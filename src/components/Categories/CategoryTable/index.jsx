@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import CategoryRow from '../CategoryRow';
-import { fetchCategories } from '../../../api/categoryApi';
+import { fetchCategories, postCategory } from '../../../api/categoryApi';
 import './CategoryTable.css';
 
 function CategoryTable() {
@@ -8,6 +8,10 @@ function CategoryTable() {
   const [sortField, setSortField] = useState('id');
   const [sortDirection, setSortDirection] = useState('asc');
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isAdding, setIsAdding] = useState(false);
+  const [newCategory, setNewCategory] = useState({ name: '', image: '' });
+  const [isAddingSaving, setIsAddingSaving] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,6 +122,62 @@ function CategoryTable() {
                 }}
               />
             ))}
+            {isAdding ? (
+              <tr>
+                <td>New</td>
+                <td>
+                  <input
+                    type="text"
+                    name="name"
+                    value={newCategory.name}
+                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    name="image"
+                    value={newCategory.image}
+                    onChange={(e) => setNewCategory({ ...newCategory, image: e.target.value })}
+                  />
+                </td>
+                <td>
+                  <button
+                    onClick={async () => {
+                      setIsAddingSaving(true);
+                      try {
+                        const added = await postCategory(newCategory);
+                        setCategories((prev) => [...prev, added]);
+                        setIsAdding(false);
+                        setNewCategory({ name: '', image: '' });
+                      } catch (err) {
+                        console.error('Failed to add category:', err);
+                      } finally {
+                        setIsAddingSaving(false);
+                      }
+                    }}
+                    disabled={isAddingSaving}
+                  >
+                    {isAddingSaving ? 'Adding...' : 'Add'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsAdding(false);
+                      setNewCategory({ name: '', image: '' });
+                    }}
+                    disabled={isAddingSaving}
+                  >
+                    Cancel
+                  </button>
+                </td>
+              </tr>
+            ) : (
+              <tr>
+                <td colSpan="4">
+                  <button onClick={() => setIsAdding(true)}>+ Add Category</button>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       )}

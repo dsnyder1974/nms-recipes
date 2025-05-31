@@ -31,3 +31,22 @@ export async function patchCategory(id, updates) {
 
   return await response.json();
 }
+
+export async function postCategory(updates) {
+  const response = await fetch(
+    `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgCategory`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updates),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to post new category ${updates.name}`);
+  }
+
+  return await response.json();
+}
