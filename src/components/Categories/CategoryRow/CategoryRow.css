@@ -3,3 +3,36 @@
   height: 50px;
   object-fit: cover;
 }
+
+.no-image {
+  color: #999;
+  font-style: italic;
+}
+
+.category-table td {
+  padding: 8px 12px;
+}
+
+.editing-cell {
+  padding: 0;
+}
+
+.id-column {
+  width: 80px;
+}
+
+.category-row-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px; /* match normal td padding */
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.saving-row {
+  opacity: 0.5; /* visually shows row is "busy" */
+  pointer-events: none; /* optional — disables all interaction */
+}

@@ -37,20 +37,32 @@ function CategoryRow({ category, onUpdate }) {
   };
 
   return (
-    <tr className="category-row">
+    <tr className={`category-row ${isSaving ? 'saving-row' : ''}`}>
       <td>{category.id}</td>
 
-      <td>
+      <td className={isEditing ? 'editing-cell' : ''}>
         {isEditing ? (
-          <input type="text" name="name" value={editedCategory.name} onChange={handleChange} />
+          <input
+            type="text"
+            name="name"
+            value={editedCategory.name}
+            onChange={handleChange}
+            className="category-row-input"
+          />
         ) : (
           category.name
         )}
       </td>
 
-      <td>
+      <td className={isEditing ? 'editing-cell' : ''}>
         {isEditing ? (
-          <input type="text" name="image" value={editedCategory.image} onChange={handleChange} />
+          <input
+            type="text"
+            name="image"
+            value={editedCategory.image}
+            onChange={handleChange}
+            className="category-row-input"
+          />
         ) : category.image ? (
           <img src={category.image} alt={category.name} className="category-image" />
         ) : (
@@ -62,7 +74,7 @@ function CategoryRow({ category, onUpdate }) {
         {isEditing ? (
           <>
             <button onClick={handleSave} disabled={isSaving}>
-              Save
+              {isSaving ? 'Saving...' : 'Save'}
             </button>
             <button onClick={handleCancel} disabled={isSaving}>
               Cancel
