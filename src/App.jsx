@@ -8,12 +8,14 @@ import { ToastContainer } from 'react-toastify';
 function App() {
   return (
     <>
-      <CategoryTable />
+      <div className="page-content">
+        <CategoryTable />
+        <ToastContainer position="bottom-right" autoClose={2000} />
+      </div>
       {/* <div style={{ maxWidth: 400, margin: '40px auto', fontFamily: 'Arial' }}>
         <h2>Select or Create a Tag</h2>
         <CategorySelect />
       </div> */}
-      <ToastContainer position="bottom-right" autoClose={2000} />
     </>
   );
 }

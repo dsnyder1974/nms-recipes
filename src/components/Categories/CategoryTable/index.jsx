@@ -98,126 +98,127 @@ function CategoryTable() {
 
   return (
     <>
-      <h2 className="category-title">Categories</h2>
-
-      {isLoading ? (
-        <p>Loading categories...</p>
-      ) : categories.length === 0 ? (
-        <p>No categories found.</p>
-      ) : (
-        <table className="category-table">
-          <thead>
-            <tr>
-              <th
-                onClick={() => handleSort('id')}
-                tabIndex="0"
-                aria-sort={
-                  sortField === 'id'
-                    ? sortDirection === 'asc'
-                      ? 'ascending'
-                      : 'descending'
-                    : 'none'
-                }
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') handleSort('id');
-                }}
-                className="sortable id-column"
-              >
-                <div className="sortable-label-container">
-                  <span className="sortable-label">ID</span>
-                  <span className="sort-arrow">
-                    {sortField === 'id' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                  </span>
-                </div>
-              </th>
-
-              <th
-                onClick={() => handleSort('name')}
-                tabIndex="0"
-                aria-sort={
-                  sortField === 'name'
-                    ? sortDirection === 'asc'
-                      ? 'ascending'
-                      : 'descending'
-                    : 'none'
-                }
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') handleSort('name');
-                }}
-                className="sortable"
-              >
-                <div className="sortable-label-container">
-                  <span className="sortable-label">Name</span>
-                  <span className="sort-arrow">
-                    {sortField === 'name' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                  </span>
-                </div>
-              </th>
-
-              <th>Image</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {sortedCategories.map((category) => (
-              <CategoryRow
-                key={category.id}
-                category={category}
-                onUpdate={handleUpdateCategory}
-                onDelete={handleDeleteCategory}
-              />
-            ))}
-
-            {/* 🚀 Always-visible Add Category Row */}
-            <tr className="add-category-row">
-              <td>New</td>
-              <td className="editing-cell">
-                <input
-                  type="text"
-                  name="name"
-                  value={newCategory.name}
-                  onChange={(e) =>
-                    setNewCategory({
-                      ...newCategory,
-                      name: e.target.value,
-                    })
+      <div className="category-table-container">
+        <h2 className="category-title">Categories</h2>
+        {isLoading ? (
+          <p>Loading categories...</p>
+        ) : categories.length === 0 ? (
+          <p>No categories found.</p>
+        ) : (
+          <table className="category-table">
+            <thead>
+              <tr>
+                <th
+                  onClick={() => handleSort('id')}
+                  tabIndex="0"
+                  aria-sort={
+                    sortField === 'id'
+                      ? sortDirection === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
                   }
-                  className="category-row-input"
-                  disabled={isAddingSaving}
-                  placeholder="Enter name"
-                />
-              </td>
-              <td className="editing-cell">
-                <input
-                  type="text"
-                  name="image"
-                  value={newCategory.image}
-                  onChange={(e) =>
-                    setNewCategory({
-                      ...newCategory,
-                      image: e.target.value,
-                    })
-                  }
-                  className="category-row-input"
-                  disabled={isAddingSaving}
-                  placeholder="Enter image URL"
-                />
-              </td>
-              <td>
-                <button
-                  onClick={handleAddCategory}
-                  disabled={isAddingSaving}
-                  title="Add Category"
-                  className="icon-button add-button"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') handleSort('id');
+                  }}
+                  className="sortable id-column"
                 >
-                  {isAddingSaving ? <FaSpinner className="icon-spin" /> : <FiPlus />}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      )}
+                  <div className="sortable-label-container">
+                    <span className="sortable-label">ID</span>
+                    <span className="sort-arrow">
+                      {sortField === 'id' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                    </span>
+                  </div>
+                </th>
+
+                <th
+                  onClick={() => handleSort('name')}
+                  tabIndex="0"
+                  aria-sort={
+                    sortField === 'name'
+                      ? sortDirection === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') handleSort('name');
+                  }}
+                  className="sortable"
+                >
+                  <div className="sortable-label-container">
+                    <span className="sortable-label">Name</span>
+                    <span className="sort-arrow">
+                      {sortField === 'name' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                    </span>
+                  </div>
+                </th>
+
+                <th>Image</th>
+                <th className="actions-column"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {sortedCategories.map((category) => (
+                <CategoryRow
+                  key={category.id}
+                  category={category}
+                  onUpdate={handleUpdateCategory}
+                  onDelete={handleDeleteCategory}
+                />
+              ))}
+
+              {/* Always-visible Add Category Row */}
+              <tr className="add-category-row">
+                <td>New</td>
+                <td className="editing-cell">
+                  <input
+                    type="text"
+                    name="name"
+                    value={newCategory.name}
+                    onChange={(e) =>
+                      setNewCategory({
+                        ...newCategory,
+                        name: e.target.value,
+                      })
+                    }
+                    className="category-row-input"
+                    disabled={isAddingSaving}
+                    placeholder="Enter name"
+                  />
+                </td>
+                <td className="editing-cell">
+                  <input
+                    type="text"
+                    name="image"
+                    value={newCategory.image}
+                    onChange={(e) =>
+                      setNewCategory({
+                        ...newCategory,
+                        image: e.target.value,
+                      })
+                    }
+                    className="category-row-input"
+                    disabled={isAddingSaving}
+                    placeholder="Enter image URL"
+                  />
+                </td>
+                <td>
+                  <button
+                    onClick={handleAddCategory}
+                    disabled={isAddingSaving}
+                    title="Add Category"
+                    className="icon-button add-button"
+                  >
+                    {isAddingSaving ? <FaSpinner className="icon-spin" /> : <FiPlus />}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        )}
+      </div>
     </>
   );
 }
