@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './CategoryRow.css';
 import { patchCategory } from '../../../api/categoryApi';
 
-function CategoryRow({ category, onUpdate }) {
+function CategoryRow({ category, onUpdate, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCategory, setEditedCategory] = useState({ ...category });
   const [isSaving, setIsSaving] = useState(false);
@@ -34,6 +34,21 @@ function CategoryRow({ category, onUpdate }) {
   const handleCancel = () => {
     setEditedCategory({ ...category });
     setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete category "${category.name}"?`
+    );
+    if (!confirmDelete) return;
+    try {
+      setIsSaving(true);
+      await onDelete(category.id);
+    } catch (error) {
+      console.error('Failed to delete category:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -81,7 +96,14 @@ function CategoryRow({ category, onUpdate }) {
             </button>
           </>
         ) : (
-          <button onClick={() => setIsEditing(true)}>Edit</button>
+          <>
+            <button onClick={() => setIsEditing(true)} disabled={isSaving}>
+              Edit
+            </button>
+            <button onClick={handleDelete} disabled={isSaving}>
+              {isSaving ? 'Deleting...' : 'Delete'}
+            </button>
+          </>
         )}
       </td>
     </tr>

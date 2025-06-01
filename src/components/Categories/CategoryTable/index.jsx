@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import CategoryRow from '../CategoryRow';
-import { fetchCategories, postCategory } from '../../../api/categoryApi';
+import { fetchCategories, postCategory, deleteCategory } from '../../../api/categoryApi';
 import './CategoryTable.css';
 
 function CategoryTable() {
@@ -34,6 +34,15 @@ function CategoryTable() {
     } else {
       setSortField(field);
       setSortDirection('asc');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteCategory(id);
+      setCategories((prev) => prev.filter((cat) => cat.id !== id));
+    } catch (err) {
+      console.error('Failed to delete category:', err);
     }
   };
 
@@ -120,6 +129,7 @@ function CategoryTable() {
                     prev.map((cat) => (cat.id === updatedCategory.id ? updatedCategory : cat))
                   );
                 }}
+                onDelete={handleDelete}
               />
             ))}
             {isAdding ? (
