@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import CategoryRow from '../CategoryRow';
-import { fetchCategories, postCategory, deleteCategory } from '../../../api/categoryApi';
+import { fetchCategories, deleteCategory, postCategory } from '../../../api/categoryApi';
+import { FaSpinner } from 'react-icons/fa';
+import { FiPlus } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 import './CategoryTable.css';
 
 function CategoryTable() {
@@ -9,7 +12,6 @@ function CategoryTable() {
   const [sortDirection, setSortDirection] = useState('asc');
   const [isLoading, setIsLoading] = useState(true);
 
-  const [isAdding, setIsAdding] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', image: '' });
   const [isAddingSaving, setIsAddingSaving] = useState(false);
 
@@ -20,6 +22,7 @@ function CategoryTable() {
         setCategories(categoriesData);
       } catch (error) {
         console.error('Error fetching categories:', error);
+        toast.error('Failed to fetch categories');
       } finally {
         setIsLoading(false);
       }
@@ -37,15 +40,6 @@ function CategoryTable() {
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteCategory(id);
-      setCategories((prev) => prev.filter((cat) => cat.id !== id));
-    } catch (err) {
-      console.error('Failed to delete category:', err);
-    }
-  };
-
   const sortedCategories = [...categories].sort((a, b) => {
     let aValue = a[sortField];
     let bValue = b[sortField];
@@ -59,12 +53,57 @@ function CategoryTable() {
     return sortDirection === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
   });
 
+  const handleDeleteCategory = async (id) => {
+    try {
+      await deleteCategory(id);
+      setCategories((prev) => prev.filter((cat) => cat.id !== id));
+      toast.success('Category deleted!');
+    } catch (err) {
+      console.error('Failed to delete category:', err);
+      toast.error('Failed to delete category');
+    }
+  };
+
+  const handleUpdateCategory = async (updatedCategory) => {
+    try {
+      setCategories((prev) =>
+        prev.map((cat) => (cat.id === updatedCategory.id ? updatedCategory : cat))
+      );
+      toast.success('Category updated!');
+    } catch (err) {
+      console.error('Failed to update category:', err);
+      toast.error('Failed to update category');
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategory.name.trim()) {
+      toast.error('Category name is required');
+      return;
+    }
+
+    setIsAddingSaving(true);
+    try {
+      const added = await postCategory(newCategory);
+      setCategories((prev) => [...prev, added]);
+      setNewCategory({ name: '', image: '' });
+      toast.success('Category added!');
+    } catch (err) {
+      console.error('Failed to add category:', err);
+      toast.error('Failed to add category');
+    } finally {
+      setIsAddingSaving(false);
+    }
+  };
+
   return (
     <>
       <h2 className="category-title">Categories</h2>
 
       {isLoading ? (
         <p>Loading categories...</p>
+      ) : categories.length === 0 ? (
+        <p>No categories found.</p>
       ) : (
         <table className="category-table">
           <thead>
@@ -119,75 +158,63 @@ function CategoryTable() {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {sortedCategories.map((category) => (
               <CategoryRow
                 key={category.id}
                 category={category}
-                onUpdate={(updatedCategory) => {
-                  setCategories((prev) =>
-                    prev.map((cat) => (cat.id === updatedCategory.id ? updatedCategory : cat))
-                  );
-                }}
-                onDelete={handleDelete}
+                onUpdate={handleUpdateCategory}
+                onDelete={handleDeleteCategory}
               />
             ))}
-            {isAdding ? (
-              <tr>
-                <td>New</td>
-                <td>
-                  <input
-                    type="text"
-                    name="name"
-                    value={newCategory.name}
-                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    name="image"
-                    value={newCategory.image}
-                    onChange={(e) => setNewCategory({ ...newCategory, image: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <button
-                    onClick={async () => {
-                      setIsAddingSaving(true);
-                      try {
-                        const added = await postCategory(newCategory);
-                        setCategories((prev) => [...prev, added]);
-                        setIsAdding(false);
-                        setNewCategory({ name: '', image: '' });
-                      } catch (err) {
-                        console.error('Failed to add category:', err);
-                      } finally {
-                        setIsAddingSaving(false);
-                      }
-                    }}
-                    disabled={isAddingSaving}
-                  >
-                    {isAddingSaving ? 'Adding...' : 'Add'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsAdding(false);
-                      setNewCategory({ name: '', image: '' });
-                    }}
-                    disabled={isAddingSaving}
-                  >
-                    Cancel
-                  </button>
-                </td>
-              </tr>
-            ) : (
-              <tr>
-                <td colSpan="4">
-                  <button onClick={() => setIsAdding(true)}>+ Add Category</button>
-                </td>
-              </tr>
-            )}
+
+            {/* 🚀 Always-visible Add Category Row */}
+            <tr className="add-category-row">
+              <td>New</td>
+              <td className="editing-cell">
+                <input
+                  type="text"
+                  name="name"
+                  value={newCategory.name}
+                  onChange={(e) =>
+                    setNewCategory({
+                      ...newCategory,
+                      name: e.target.value,
+                    })
+                  }
+                  className="category-row-input"
+                  disabled={isAddingSaving}
+                  placeholder="Enter name"
+                />
+              </td>
+              <td className="editing-cell">
+                <input
+                  type="text"
+                  name="image"
+                  value={newCategory.image}
+                  onChange={(e) =>
+                    setNewCategory({
+                      ...newCategory,
+                      image: e.target.value,
+                    })
+                  }
+                  className="category-row-input"
+                  disabled={isAddingSaving}
+                  placeholder="Enter image URL"
+                />
+              </td>
+              <td>
+                <button
+                  onClick={handleAddCategory}
+                  disabled={isAddingSaving}
+                  title="Add Category"
+                  className="icon-button add-button"
+                >
+                  {isAddingSaving ? <FaSpinner className="icon-spin" /> : <FiPlus />}
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
       )}

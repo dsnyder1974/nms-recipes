@@ -1,7 +1,26 @@
+.saving-row {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.icon-spin {
+  animation: icon-spin 1s linear infinite;
+}
+
+@keyframes icon-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .category-image {
-  width: 50px;
   height: 50px;
+  width: auto;
   object-fit: cover;
+  border-radius: 4px;
 }
 
 .no-image {
@@ -9,30 +28,45 @@
   font-style: italic;
 }
 
-.category-table td {
-  padding: 8px 12px;
-}
-
 .editing-cell {
   padding: 0;
 }
 
-.id-column {
-  width: 80px;
+.category-row td:not(.editing-cell) {
+  cursor: pointer;
 }
 
 .category-row-input {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: 8px 12px; /* match normal td padding */
+  padding: 8px 12px;
   font-size: 1rem;
   line-height: 1.5;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-.saving-row {
-  opacity: 0.5; /* visually shows row is "busy" */
-  pointer-events: none; /* optional — disables all interaction */
+.category-row td button {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: inherit; /* default — can override below */
+  font-size: 1.2rem; /* control icon size */
+}
+
+.category-row td button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Specific styling for Delete button */
+.category-row td button[title='Delete'] {
+  color: #e53935; /* RED */
+}
+
+/* Optional: hover effect for Delete */
+.category-row td button[title='Delete']:hover {
+  color: #b71c1c; /* darker red on hover */
 }

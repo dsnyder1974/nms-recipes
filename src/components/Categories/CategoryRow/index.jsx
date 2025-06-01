@@ -1,39 +1,31 @@
 import { useState } from 'react';
 import './CategoryRow.css';
-import { patchCategory } from '../../../api/categoryApi';
+import { FaSpinner } from 'react-icons/fa';
+import { FiTrash2 } from 'react-icons/fi';
 
 function CategoryRow({ category, onUpdate, onDelete }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedCategory, setEditedCategory] = useState({ ...category });
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditedCategory((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Per-field edit state
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingImage, setIsEditingImage] = useState(false);
 
-  const handleSave = async () => {
+  // Editable field values
+  const [editedName, setEditedName] = useState(category.name);
+  const [editedImage, setEditedImage] = useState(category.image || '');
+
+  const handleSaveField = async (field, value) => {
     setIsSaving(true);
     try {
-      const updated = await patchCategory(editedCategory.id, {
-        name: editedCategory.name,
-        image: editedCategory.image,
+      await onUpdate({
+        ...category,
+        [field]: value,
       });
-      onUpdate(updated);
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Failed to save category:', error);
+    } catch (err) {
+      console.error(`Failed to update category ${field}:`, err);
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleCancel = () => {
-    setEditedCategory({ ...category });
-    setIsEditing(false);
   };
 
   const handleDelete = async () => {
@@ -41,11 +33,12 @@ function CategoryRow({ category, onUpdate, onDelete }) {
       `Are you sure you want to delete category "${category.name}"?`
     );
     if (!confirmDelete) return;
+
     try {
       setIsSaving(true);
       await onDelete(category.id);
-    } catch (error) {
-      console.error('Failed to delete category:', error);
+    } catch (err) {
+      console.error('Failed to delete category:', err);
     } finally {
       setIsSaving(false);
     }
@@ -55,28 +48,62 @@ function CategoryRow({ category, onUpdate, onDelete }) {
     <tr className={`category-row ${isSaving ? 'saving-row' : ''}`}>
       <td>{category.id}</td>
 
-      <td className={isEditing ? 'editing-cell' : ''}>
-        {isEditing ? (
+      {/* NAME FIELD */}
+      <td onClick={() => setIsEditingName(true)} className={isEditingName ? 'editing-cell' : ''}>
+        {isEditingName ? (
           <input
             type="text"
-            name="name"
-            value={editedCategory.name}
-            onChange={handleChange}
+            value={editedName}
+            autoFocus
+            onChange={(e) => setEditedName(e.target.value)}
+            onBlur={async (e) => {
+              const newValue = e.target.value.trim();
+              if (newValue && newValue !== category.name) {
+                await handleSaveField('name', newValue);
+              }
+              setIsEditingName(false);
+            }}
+            onKeyDown={async (e) => {
+              if (e.key === 'Enter') {
+                e.target.blur();
+              } else if (e.key === 'Escape') {
+                setIsEditingName(false);
+                setEditedName(category.name); // reset
+              }
+            }}
             className="category-row-input"
+            disabled={isSaving}
           />
         ) : (
           category.name
         )}
       </td>
 
-      <td className={isEditing ? 'editing-cell' : ''}>
-        {isEditing ? (
+      {/* IMAGE FIELD */}
+      <td onClick={() => setIsEditingImage(true)} className={isEditingImage ? 'editing-cell' : ''}>
+        {isEditingImage ? (
           <input
             type="text"
-            name="image"
-            value={editedCategory.image}
-            onChange={handleChange}
+            value={editedImage}
+            autoFocus
+            onChange={(e) => setEditedImage(e.target.value)}
+            onBlur={async (e) => {
+              const newValue = e.target.value.trim();
+              if (newValue !== category.image) {
+                await handleSaveField('image', newValue);
+              }
+              setIsEditingImage(false);
+            }}
+            onKeyDown={async (e) => {
+              if (e.key === 'Enter') {
+                e.target.blur();
+              } else if (e.key === 'Escape') {
+                setIsEditingImage(false);
+                setEditedImage(category.image || ''); // reset
+              }
+            }}
             className="category-row-input"
+            disabled={isSaving}
           />
         ) : category.image ? (
           <img src={category.image} alt={category.name} className="category-image" />
@@ -85,26 +112,11 @@ function CategoryRow({ category, onUpdate, onDelete }) {
         )}
       </td>
 
+      {/* ACTION BUTTONS */}
       <td>
-        {isEditing ? (
-          <>
-            <button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save'}
-            </button>
-            <button onClick={handleCancel} disabled={isSaving}>
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <button onClick={() => setIsEditing(true)} disabled={isSaving}>
-              Edit
-            </button>
-            <button onClick={handleDelete} disabled={isSaving}>
-              {isSaving ? 'Deleting...' : 'Delete'}
-            </button>
-          </>
-        )}
+        <button onClick={handleDelete} disabled={isSaving} title="Delete">
+          {isSaving ? <FaSpinner className="icon-spin" /> : <FiTrash2 />}
+        </button>
       </td>
     </tr>
   );
