@@ -18,6 +18,7 @@ Key features include:
 
 ## 🛠️ Tech Stack
 
+- **\*Notion** (project management & documentation) [Notion Link](https://perpetual-cobalt-b4e.notion.site/1f50ea20f0f480339cf7f733b899b07a?v=1f50ea20f0f4814d8434000ca574d7d9&source=copy_link)\*
 - **React** (functional components + hooks)
 - **React Router** (routing)
 - **Custom API Integration** (fetching categories from a remote API)
