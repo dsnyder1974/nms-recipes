@@ -6,7 +6,7 @@ A modern React web application for managing recipes for the game No Man's Sky. B
 
 ## 🚀 Project Overview
 
-NMS Recipes currently is a React-based front-end that allows users to view, create, and manage recipe categories. It connects to an AWS-backed serverless API for data management.
+NMS Recipes currently is a React-based front-end that allows users to view, create, and manage recipe categories. It connects to an AWS-backed serverless API for data management. The project's progress is tracked in [**Notion**](https://perpetual-cobalt-b4e.notion.site/1f50ea20f0f480339cf7f733b899b07a?v=1f50ea20f0f4814d8434000ca574d7d9&source=copy_link).
 
 Key features include:
 
@@ -18,7 +18,7 @@ Key features include:
 
 ## 🛠️ Tech Stack
 
-- **\*Notion** (project management & documentation) [Notion Link](https://perpetual-cobalt-b4e.notion.site/1f50ea20f0f480339cf7f733b899b07a?v=1f50ea20f0f4814d8434000ca574d7d9&source=copy_link)\*
+- **JavaScript** (ES6+)
 - **React** (functional components + hooks)
 - **React Router** (routing)
 - **Custom API Integration** (fetching categories from a remote API)
