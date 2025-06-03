@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import CategoryRow from '../CategoryRow';
-import { fetchCategories, deleteCategory, postCategory } from '../../../api/categoryApi';
+import {
+  fetchCategories,
+  patchCategory,
+  deleteCategory,
+  postCategory,
+} from '../../../api/categoryApi';
 import { FaSpinner } from 'react-icons/fa';
 import { FiPlus } from 'react-icons/fi';
 import { toast } from 'react-toastify';
@@ -8,11 +13,11 @@ import './CategoryTable.css';
 
 function CategoryTable() {
   const [categories, setCategories] = useState([]);
-  const [sortField, setSortField] = useState('id');
+  const [sortField, setSortField] = useState('category_id');
   const [sortDirection, setSortDirection] = useState('asc');
   const [isLoading, setIsLoading] = useState(true);
 
-  const [newCategory, setNewCategory] = useState({ name: '', image: '' });
+  const [newCategory, setNewCategory] = useState({ name: '', description: '' });
   const [isAddingSaving, setIsAddingSaving] = useState(false);
 
   useEffect(() => {
@@ -53,10 +58,10 @@ function CategoryTable() {
     return sortDirection === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
   });
 
-  const handleDeleteCategory = async (id) => {
+  const handleDeleteCategory = async (category_id) => {
     try {
-      await deleteCategory(id);
-      setCategories((prev) => prev.filter((cat) => cat.id !== id));
+      await deleteCategory(category_id);
+      setCategories((prev) => prev.filter((cat) => cat.category_id !== category_id));
       toast.success('Category deleted!');
     } catch (err) {
       console.error('Failed to delete category:', err);
@@ -66,8 +71,9 @@ function CategoryTable() {
 
   const handleUpdateCategory = async (updatedCategory) => {
     try {
+      const savedCategory = await patchCategory(updatedCategory);
       setCategories((prev) =>
-        prev.map((cat) => (cat.id === updatedCategory.id ? updatedCategory : cat))
+        prev.map((cat) => (cat.category_id === savedCategory.category_id ? savedCategory : cat))
       );
       toast.success('Category updated!');
     } catch (err) {
@@ -86,7 +92,7 @@ function CategoryTable() {
     try {
       const added = await postCategory(newCategory);
       setCategories((prev) => [...prev, added]);
-      setNewCategory({ name: '', image: '' });
+      setNewCategory({ name: '', description: '' });
       toast.success('Category added!');
     } catch (err) {
       console.error('Failed to add category:', err);
@@ -109,24 +115,24 @@ function CategoryTable() {
             <thead>
               <tr>
                 <th
-                  onClick={() => handleSort('id')}
+                  onClick={() => handleSort('category_id')}
                   tabIndex="0"
                   aria-sort={
-                    sortField === 'id'
+                    sortField === 'category_id'
                       ? sortDirection === 'asc'
                         ? 'ascending'
                         : 'descending'
                       : 'none'
                   }
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') handleSort('id');
+                    if (e.key === 'Enter' || e.key === ' ') handleSort('category_id');
                   }}
                   className="sortable id-column"
                 >
                   <div className="sortable-label-container">
-                    <span className="sortable-label">ID</span>
+                    <span className="sortable-label">Cateogry ID</span>
                     <span className="sort-arrow">
-                      {sortField === 'id' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                      {sortField === 'category_id' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
                     </span>
                   </div>
                 </th>
@@ -154,7 +160,7 @@ function CategoryTable() {
                   </div>
                 </th>
 
-                <th>Image</th>
+                <th>Description</th>
                 <th className="actions-column"></th>
               </tr>
             </thead>
@@ -162,7 +168,7 @@ function CategoryTable() {
             <tbody>
               {sortedCategories.map((category) => (
                 <CategoryRow
-                  key={category.id}
+                  key={category.category_id}
                   category={category}
                   onUpdate={handleUpdateCategory}
                   onDelete={handleDeleteCategory}
@@ -191,17 +197,17 @@ function CategoryTable() {
                 <td className="editing-cell">
                   <input
                     type="text"
-                    name="image"
-                    value={newCategory.image}
+                    name="description"
+                    value={newCategory.description}
                     onChange={(e) =>
                       setNewCategory({
                         ...newCategory,
-                        image: e.target.value,
+                        description: e.target.value,
                       })
                     }
                     className="category-row-input"
                     disabled={isAddingSaving}
-                    placeholder="Enter image URL"
+                    placeholder="Enter description (optional)"
                   />
                 </td>
                 <td>

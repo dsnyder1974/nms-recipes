@@ -1,13 +1,16 @@
 // src/App.jsx
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import ManageCategories from './pages/ManageCategories';
+import './App.css'; // Import global styles
 
 function App() {
   return (
     <Router>
+      <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar newestOnTop />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />

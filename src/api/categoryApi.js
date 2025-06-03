@@ -13,20 +13,23 @@ export const fetchCategories = async () => {
   return data;
 };
 
-export async function patchCategory(id, updates) {
+export async function patchCategory(updatedCategory) {
   const response = await fetch(
-    `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgCategory/${id}`,
+    `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgCategory/${updatedCategory.category_id}`,
     {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(updates),
+      body: JSON.stringify({
+        name: updatedCategory.name,
+        description: updatedCategory.description ?? null,
+      }),
     }
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to patch category ${id}`);
+    throw new Error('Failed to update category');
   }
 
   return await response.json();
@@ -51,9 +54,9 @@ export async function postCategory(updates) {
   return await response.json();
 }
 
-export async function deleteCategory(id) {
+export async function deleteCategory(category_id) {
   const response = await fetch(
-    `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgCategory/${id}`,
+    `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgCategory/${category_id}`,
     {
       method: 'DELETE',
       headers: {
@@ -63,7 +66,7 @@ export async function deleteCategory(id) {
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to patch category ${id}`);
+    throw new Error(`Failed to patch category ${category_id}`);
   }
 
   return await response.json();

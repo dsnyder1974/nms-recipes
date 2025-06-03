@@ -8,11 +8,11 @@ function CategoryRow({ category, onUpdate, onDelete }) {
 
   // Per-field edit state
   const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingImage, setIsEditingImage] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
 
   // Editable field values
   const [editedName, setEditedName] = useState(category.name);
-  const [editedImage, setEditedImage] = useState(category.image || '');
+  const [editedDescription, setEditedDescription] = useState(category.description || '');
 
   const handleSaveField = async (field, value) => {
     setIsSaving(true);
@@ -36,7 +36,7 @@ function CategoryRow({ category, onUpdate, onDelete }) {
 
     try {
       setIsSaving(true);
-      await onDelete(category.id);
+      await onDelete(category.category_id);
     } catch (err) {
       console.error('Failed to delete category:', err);
     } finally {
@@ -46,7 +46,7 @@ function CategoryRow({ category, onUpdate, onDelete }) {
 
   return (
     <tr className={`category-row ${isSaving ? 'saving-row' : ''}`}>
-      <td>{category.id}</td>
+      <td>{category.category_id}</td>
 
       {/* NAME FIELD */}
       <td onClick={() => setIsEditingName(true)} className={isEditingName ? 'editing-cell' : ''}>
@@ -79,36 +79,39 @@ function CategoryRow({ category, onUpdate, onDelete }) {
         )}
       </td>
 
-      {/* IMAGE FIELD */}
-      <td onClick={() => setIsEditingImage(true)} className={isEditingImage ? 'editing-cell' : ''}>
-        {isEditingImage ? (
+      {/* DESCRIPTION FIELD */}
+      <td
+        onClick={() => setIsEditingDescription(true)}
+        className={isEditingDescription ? 'editing-cell' : ''}
+      >
+        {isEditingDescription ? (
           <input
             type="text"
-            value={editedImage}
+            value={editedDescription}
             autoFocus
-            onChange={(e) => setEditedImage(e.target.value)}
+            onChange={(e) => setEditedDescription(e.target.value)}
             onBlur={async (e) => {
               const newValue = e.target.value.trim();
-              if (newValue !== category.image) {
-                await handleSaveField('image', newValue);
+              if (newValue !== category.description) {
+                await handleSaveField('description', newValue);
               }
-              setIsEditingImage(false);
+              setIsEditingDescription(false);
             }}
             onKeyDown={async (e) => {
               if (e.key === 'Enter') {
                 e.target.blur();
               } else if (e.key === 'Escape') {
-                setIsEditingImage(false);
-                setEditedImage(category.image || ''); // reset
+                setIsEditingDescription(false);
+                setEditedDescription(category.description || ''); // reset
               }
             }}
             className="category-row-input"
             disabled={isSaving}
           />
-        ) : category.image ? (
-          <img src={category.image} alt={category.name} className="category-image" />
+        ) : category.description ? (
+          <span className="category-description">{category.description}</span>
         ) : (
-          <span className="no-image">No image</span>
+          <span className="no-image">No Description</span>
         )}
       </td>
 

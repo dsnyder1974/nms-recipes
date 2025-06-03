@@ -1,10 +1,10 @@
 // src/components/TagSelect.js
 
 //import React from 'react';
-import { useEffect, useState } from "react";
-import CreatableSelect from "react-select/creatable";
-import CustomOption from "./CustomOption";
-import { fetchCategories } from "../../../api/categoryApi";
+import { useEffect, useState } from 'react';
+import CreatableSelect from 'react-select/creatable';
+import CustomOption from './CustomOption';
+import { fetchCategories } from '../../../api/categoryApi';
 
 export default function CategorySelect() {
   const [options, setOptions] = useState([]);
@@ -21,7 +21,7 @@ export default function CategorySelect() {
         }));
         setOptions(mappedOptions);
       } catch (error) {
-        console.error("Failed to fetch tags:", error);
+        console.error('Failed to fetch tags:', error);
       } finally {
         setIsLoading(false);
       }
@@ -37,9 +37,7 @@ export default function CategorySelect() {
   };
 
   const handleDeleteOption = (optionToDelete) => {
-    setOptions((prev) =>
-      prev.filter((opt) => opt.value !== optionToDelete.value)
-    );
+    setOptions((prev) => prev.filter((opt) => opt.value !== optionToDelete.value));
     if (selectedOption?.value === optionToDelete.value) {
       setSelectedOption(null);
     }
@@ -50,14 +48,14 @@ export default function CategorySelect() {
       isClearable
       isLoading={isLoading}
       isDisabled={isLoading}
-      loadingMessage={() => "Loading options..."}
+      loadingMessage={() => 'Loading options...'}
       options={options}
       value={selectedOption}
       onChange={setSelectedOption}
       onCreateOption={handleCreate}
       components={{ Option: CustomOption }}
       onDeleteOption={handleDeleteOption}
-      placeholder={isLoading ? "Loading..." : ""}
+      placeholder={isLoading ? 'Loading...' : ''}
     />
   );
 }

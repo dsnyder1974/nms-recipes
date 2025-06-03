@@ -1,37 +1,14 @@
-/* src/App.css */
+@import url('https://font.nmscd.com/assets/font/NMSFuturaProBook_Kerned/Web-TT/NMSFuturaProBook_Kerned.css');
+@import url('https://font.nmscd.com/assets/font/NMSGeoSans_Kerned/Web-TT/NMSGeoSans_Kerned.css');
 
-.app {
-  font-family: Arial, sans-serif;
+body {
+  font-family: 'NMSFuturaProBook', sans-serif;
+  background-color: #fff;
+  color: #222;
 }
 
-.navbar {
-  background-color: #f8f8f8;
-  padding: 1rem;
-  border-bottom: 1px solid #ddd;
-}
-
-.navbar ul {
-  list-style: none;
-  display: flex;
-  gap: 1rem;
-  margin: 0;
-  padding: 0;
-}
-
-.navbar li {
-  display: inline;
-}
-
-.navbar a {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
-}
-
-.navbar a:hover {
-  color: #0077cc;
-}
-
-.page {
-  padding: 2rem;
+h1,
+h2,
+h3 {
+  font-family: 'NMSGeoSans', sans-serif;
 }
