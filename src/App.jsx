@@ -1,23 +1,26 @@
-// src/App.js
-// Component from https://react-select.com/creatable
+// src/App.jsx
 
-// import CategorySelect from './components/Categories/CategorySelect';
-import CategoryTable from './components/Categories/CategoryTable';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import Home from './pages/Home';
+import ManageCategories from './pages/ManageCategories';
 
-import { ToastContainer } from 'react-toastify';
 function App() {
   return (
-    <>
-      <div className="page-content">
-        <CategoryTable />
-        <ToastContainer position="bottom-right" autoClose={2000} />
-      </div>
-      {/* <div style={{ maxWidth: 400, margin: '40px auto', fontFamily: 'Arial' }}>
-        <h2>Select or Create a Tag</h2>
-        <CategorySelect />
-      </div> */}
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="manage-categories" element={<ManageCategories />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
+
+// <div style={{ maxWidth: 400, margin: '40px auto', fontFamily: 'Arial' }}>
+//  <h2>Select or Create a Tag</h2>
+//  <CategorySelect />
+// </div>
