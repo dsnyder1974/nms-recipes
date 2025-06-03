@@ -5,6 +5,7 @@ import { FiTrash2 } from 'react-icons/fi';
 
 function CategoryRow({ category, onUpdate, onDelete }) {
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Per-field edit state
   const [isEditingName, setIsEditingName] = useState(false);
@@ -35,12 +36,12 @@ function CategoryRow({ category, onUpdate, onDelete }) {
     if (!confirmDelete) return;
 
     try {
-      setIsSaving(true);
+      setIsDeleting(true);
       await onDelete(category.category_id);
     } catch (err) {
       console.error('Failed to delete category:', err);
     } finally {
-      setIsSaving(false);
+      setIsDeleting(false);
     }
   };
 
@@ -117,8 +118,19 @@ function CategoryRow({ category, onUpdate, onDelete }) {
 
       {/* ACTION BUTTONS */}
       <td>
-        <button onClick={handleDelete} disabled={isSaving} title="Delete">
-          {isSaving ? <FaSpinner className="icon-spin" /> : <FiTrash2 />}
+        <button
+          onClick={handleDelete}
+          disabled={isSaving || isDeleting}
+          title="Delete"
+          className={isDeleting ? 'deleting-button' : isSaving ? 'saving-button' : ''}
+        >
+          {isDeleting ? (
+            <FaSpinner className="icon-spin red-spinner" />
+          ) : isSaving ? (
+            <FaSpinner className="icon-spin green-spinner" />
+          ) : (
+            <FiTrash2 />
+          )}
         </button>
       </td>
     </tr>
