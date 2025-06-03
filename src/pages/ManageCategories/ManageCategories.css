@@ -1,0 +1,11 @@
+/* src/pages/ManageCategories.css */
+
+.manage-categories-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.manage-categories-page h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
