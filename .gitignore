@@ -18,6 +18,17 @@
 .env.test.local
 .env.production.local
 
+# local env files
+.env
+
+# Amplify cache
+.amplify
+
+# npm/yarn/pnpm logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# IDE files
+.vscode
