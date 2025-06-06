@@ -1,3 +1,4 @@
+/* Container and table styles */
 .category-title {
   font-size: 1.5rem;
   color: #333;
@@ -5,7 +6,7 @@
 
 .category-table-container {
   max-width: 800px;
-  margin: 2rem auto; /* center the table container */
+  margin: 2rem auto;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -17,7 +18,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
-  table-layout: fixed; /* prevents shifting */
+  table-layout: fixed;
 }
 
 .category-table th,
@@ -40,17 +41,14 @@
   width: 40px;
 }
 
-/* Zebra striping */
 .category-table tbody tr:nth-child(even) {
   background-color: #fafafa;
 }
 
-/* Row hover */
 .category-table tbody tr:hover {
   background-color: #f1f1f1;
 }
 
-/* Sortable columns */
 .category-table th.sortable {
   user-select: none;
   padding-right: 12px;
@@ -61,7 +59,6 @@
   outline: 2px solid #4a90e2;
 }
 
-/* Inner flex container for stable header */
 .sortable-label-container {
   display: flex;
   align-items: center;
@@ -81,18 +78,78 @@
   margin-left: 4px;
 }
 
-/* ID column width */
 .id-column {
-  width: 80px;
+  width: 125px;
 }
 
-/* Add Category Row — subtle background */
+/* FINAL Add row fix */
 .add-category-row {
-  background-color: #f9f9f9;
+  border-top: 2px solid #ccc;
 }
 
 .add-category-row td {
-  border-top: 2px solid #ccc;
+  border-bottom: none;
+}
+
+/* Editing cell layout (shared for Add + Edit rows) */
+.editing-cell {
+  /* padding: 0; */
+}
+
+.add-category-row td.editing-cell {
+  padding: 0 8px 0 0;
+}
+
+.cell-flex {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.required-hint {
+  font-size: 12px;
+  color: red;
+  margin-top: 2px;
+}
+
+.optional-hint {
+  font-size: 12px;
+  color: grey;
+  margin-top: 2px;
+}
+
+.input-error {
+  border: 1px solid red;
+}
+
+.category-row-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.non-editable-cell {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+  min-height: calc(1.5 * 1rem + 16px);
+  background-color: transparent;
+  color: #333;
+}
+
+/* CategoryRow specific */
+.saving-row {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 /* Icon-only buttons */
@@ -113,11 +170,33 @@
 }
 
 .add-button {
-  color: #43a047; /* Green */
+  color: #43a047;
 }
 
 .add-button:hover {
-  color: #2e7d32; /* Darker green */
+  color: #2e7d32;
+}
+
+.category-row td button {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: inherit;
+  font-size: 1.2rem;
+}
+
+.category-row td button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.category-row td button[title='Delete'] {
+  color: #e53935;
+}
+
+.category-row td button[title='Delete']:hover {
+  color: #b71c1c;
 }
 
 .icon-spin {
@@ -131,4 +210,25 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+.green-spinner {
+  color: green;
+}
+
+.red-spinner {
+  color: red;
+}
+
+/* Optional: If you're using images */
+.category-image {
+  height: 50px;
+  width: auto;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.no-image {
+  color: #999;
+  font-style: italic;
 }
