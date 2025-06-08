@@ -1,4 +1,4 @@
-// src/api/tags.js
+// This file contains functions to interact with the category API.
 
 export const fetchCategories = async () => {
   const response = await fetch(

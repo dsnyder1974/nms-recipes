@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import ManageCategories from './pages/ManageCategories';
+import ManageBuffs from './pages/ManageBuffs';
 import './App.css'; // Import global styles
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="manage-categories" element={<ManageCategories />} />
+          <Route path="manage-buffs" element={<ManageBuffs />} />
         </Route>
       </Routes>
     </Router>

@@ -3,7 +3,7 @@ import './DataTable.css';
 import { FaSpinner } from 'react-icons/fa';
 import { FiTrash2 } from 'react-icons/fi';
 
-function DataRow({ item, columns, onUpdate, onDelete }) {
+function DataRow({ item, columns, onUpdate, onDelete, getId }) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -42,13 +42,13 @@ function DataRow({ item, columns, onUpdate, onDelete }) {
 
   const handleDelete = async () => {
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${item.name || item.id}"?`
+      `Are you sure you want to delete "${item.name || getId(item)}"?`
     );
     if (!confirmDelete) return;
 
     try {
       setIsDeleting(true);
-      await onDelete(item.category_id || item.id);
+      await onDelete(getId(item));
     } catch (err) {
       console.error('Failed to delete item:', err);
     } finally {

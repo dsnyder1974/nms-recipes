@@ -161,6 +161,7 @@ function DataTable({
                 columns={columns}
                 onUpdate={handleUpdateItem}
                 onDelete={handleDeleteItem}
+                getId={getId}
               />
             ))}
 
@@ -198,14 +199,12 @@ function DataTable({
                       )}
                     </div>
                   ) : (
-                    <td>
-                      <div className="cell-flex">
-                        <div className="non-editable-cell">Auto</div>
-                        <div className="required-hint" style={{ visibility: 'hidden' }}>
-                          Required
-                        </div>
+                    <div className="cell-flex">
+                      <div className="non-editable-cell">Auto</div>
+                      <div className="required-hint" style={{ visibility: 'hidden' }}>
+                        Required
                       </div>
-                    </td>
+                    </div>
                   )}
                 </td>
               ))}

@@ -19,6 +19,9 @@ function Layout() {
           <li>
             <Link to="/manage-categories">Manage Categories</Link>
           </li>
+          <li>
+            <Link to="/manage-buffs">Manage Buffs</Link>
+          </li>
         </ul>
       </nav>
 
