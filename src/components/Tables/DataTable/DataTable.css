@@ -232,3 +232,19 @@
   color: #999;
   font-style: italic;
 }
+
+@media (max-width: 768px) {
+  .category-table-container {
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  .category-table {
+    min-width: 600px; /* prevent squishing the table too much */
+  }
+
+  .category-table th,
+  .category-table td {
+    white-space: nowrap;
+  }
+}
