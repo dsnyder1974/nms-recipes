@@ -28,6 +28,12 @@ function Layout() {
       <main className="main-content">
         <Outlet />
       </main>
+
+      <footer className="footer">
+        <div className="footer-content">
+          <span className="copyright">©2025 David Snyder</span>
+        </div>
+      </footer>
     </div>
   );
 }

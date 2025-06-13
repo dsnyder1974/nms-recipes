@@ -1,5 +1,12 @@
 /* src/components/Layout.css */
 
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 .header-container {
   position: relative;
   width: 100%;
@@ -55,5 +62,24 @@
 }
 
 .main-content {
+  flex-grow: 1;
   padding: 2rem;
+  box-sizing: border-box;
+}
+
+.footer {
+  background-color: navy;
+  color: white;
+  padding: 10px 20px;
+  text-align: right;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  margin-top: 40px;
+  box-sizing: border-box;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
 }
