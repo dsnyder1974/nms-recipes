@@ -1,4 +1,18 @@
 /* Container and table styles */
+
+.editor-modal-overlay {
+  position: fixed; /* Required to float above */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.4); /* Optional: dimmed backdrop */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .datatable-header {
   margin-bottom: 12px;
 }

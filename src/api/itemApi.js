@@ -24,6 +24,11 @@ export async function patchItem(updatedItem) {
       body: JSON.stringify({
         name: updatedItem.name,
         description: updatedItem.description ?? null,
+        buff_id: updatedItem.buff_id ?? null,
+        buff_bonus_text: updatedItem.buff_bonus_text ?? null,
+        buff_duration_minutes: updatedItem.buff_duration_minutes ?? null,
+        image_url: updatedItem.image_url ?? null,
+        value: updatedItem.value ?? 0,
       }),
     }
   );

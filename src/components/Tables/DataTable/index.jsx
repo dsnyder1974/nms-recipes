@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DataRow from './DataRow';
 import { FaSpinner } from 'react-icons/fa';
 import { FiPlus } from 'react-icons/fi';
@@ -22,6 +22,7 @@ function DataTable({
 
   const [newItem, setNewItem] = useState(newItemTemplate);
   const [isAddingSaving, setIsAddingSaving] = useState(false);
+  const [filterText, setFilterText] = useState('');
 
   useEffect(() => {
     const loadItems = async () => {
@@ -48,18 +49,30 @@ function DataTable({
     }
   };
 
-  const sortedItems = [...items].sort((a, b) => {
-    let aValue = a[sortField];
-    let bValue = b[sortField];
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      let aValue = a[sortField];
+      let bValue = b[sortField];
 
-    if (typeof aValue === 'string') {
-      aValue = aValue?.toLowerCase() ?? '';
-      bValue = bValue?.toLowerCase() ?? '';
-      return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-    }
+      if (typeof aValue === 'string') {
+        aValue = aValue?.toLowerCase() ?? '';
+        bValue = bValue?.toLowerCase() ?? '';
+        return sortDirection === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
 
-    return sortDirection === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
-  });
+      return sortDirection === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
+    });
+  }, [items, sortField, sortDirection]);
+
+  const filteredItems = useMemo(() => {
+    return sortedItems.filter((item) =>
+      Object.values(item).some((val) =>
+        val?.toString().toLowerCase().includes(filterText.toLowerCase())
+      )
+    );
+  }, [sortedItems, filterText]);
 
   const handleDeleteItem = async (id) => {
     try {
@@ -115,9 +128,19 @@ function DataTable({
     <div className="category-table-container">
       <h2 className="category-title">{title}</h2>
 
+      <div className="datatable-header">
+        <input
+          type="text"
+          placeholder="Filter items..."
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+          className="filter-input"
+        />
+      </div>
+
       {isLoading ? (
         <p>Loading...</p>
-      ) : items.length === 0 ? (
+      ) : filteredItems.length === 0 ? (
         <p>No items found.</p>
       ) : (
         <table className="category-table">
@@ -154,7 +177,7 @@ function DataTable({
           </thead>
 
           <tbody>
-            {sortedItems.map((item) => (
+            {filteredItems.map((item) => (
               <DataRow
                 key={getId(item)}
                 item={item}

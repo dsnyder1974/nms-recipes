@@ -1,18 +1,30 @@
-import DataTable from '../../components/Tables/DataTable';
+// import DataTable from '../../components/Tables/DataTable';
+import ItemTableWithEditor from '../../components/Tables/ItemTableWithEditor';
+
 import { fetchItems, postItem, patchItem, deleteItem } from '../../api/itemApi';
 
 const columns = [
   { field: 'item_id', label: 'Item ID', editable: false, width: '125px' },
   { field: 'name', label: 'Name', editable: true, required: true, width: '200px' },
   { field: 'description', label: 'Description', editable: true, required: false },
-  { field: 'value', label: 'Value', editable: true, required: true },
+];
+
+const editorColumns = [
+  { field: 'name', label: 'Name', editable: true, group: 'main' },
+  { field: 'item_id', label: 'Item ID', editable: false, group: 'main' },
+  { field: 'description', label: 'Description', editable: true, group: 'main' },
+  { field: 'buff_id', label: 'Buff Name', editable: true, group: 'buff' },
+  { field: 'buff_bonus_text', label: 'Buff Bonus', editable: true, group: 'buff' },
+  { field: 'buff_duration_minutes', label: 'Buff Duration (min)', editable: true, group: 'buff' },
+  { field: 'value', label: 'Value', editable: true, group: 'value' },
 ];
 
 const ManageItems = () => {
   return (
-    <DataTable
+    <ItemTableWithEditor
       title="Items"
       columns={columns}
+      editorColumns={editorColumns}
       fetchData={fetchItems}
       postItem={postItem}
       patchItem={patchItem}
