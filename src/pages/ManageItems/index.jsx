@@ -6,7 +6,9 @@ import { fetchItems, postItem, patchItem, deleteItem } from '../../api/itemApi';
 const columns = [
   { field: 'item_id', label: 'Item ID', editable: false, width: '125px' },
   { field: 'name', label: 'Name', editable: true, required: true, width: '200px' },
-  { field: 'description', label: 'Description', editable: true, required: false },
+  { field: 'buff_id', label: 'Buff', editable: true, group: 'buff' },
+  { field: 'buff_bonus_text', label: 'Bonus', editable: true, group: 'buff' },
+  { field: 'buff_duration_minutes', label: 'Duration (min)', editable: true, group: 'buff' },
 ];
 
 const editorColumns = [

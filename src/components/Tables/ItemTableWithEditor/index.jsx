@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { FaSpinner } from 'react-icons/fa';
 import ItemEditorCard from './ItemEditorCard';
+import ItemAddCard from './ItemAddCard';
 import { fetchBuffs } from '../../../api/buffApi';
 import './DataTable.css';
 
@@ -10,6 +11,8 @@ function ItemTableWithEditor({
   editorColumns, // full editable field set (with groups)
   fetchData,
   patchItem,
+  postItem,
+  deleteItem,
   getId,
   title,
 }) {
@@ -19,6 +22,7 @@ function ItemTableWithEditor({
   const [isLoading, setIsLoading] = useState(true);
   const [filterText, setFilterText] = useState('');
   const [editingItem, setEditingItem] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
   const [buffs, setBuffs] = useState([]);
 
   useEffect(() => {
@@ -78,12 +82,17 @@ function ItemTableWithEditor({
   }, [items, sortField, sortDirection]);
 
   const filteredItems = useMemo(() => {
-    return sortedItems.filter((item) =>
-      Object.values(item).some((val) =>
-        val?.toString().toLowerCase().includes(filterText.toLowerCase())
-      )
-    );
-  }, [sortedItems, filterText]);
+    return sortedItems.filter((item) => {
+      return Object.entries(item).some(([key, val]) => {
+        if (key === 'buff_id') {
+          const buffName = buffs.find((b) => b.buff_id === val)?.name ?? '';
+          return buffName.toLowerCase().includes(filterText.toLowerCase());
+        }
+
+        return val?.toString().toLowerCase().includes(filterText.toLowerCase());
+      });
+    });
+  }, [sortedItems, filterText, buffs]);
 
   const handleSave = async (updatedItem) => {
     try {
@@ -97,9 +106,35 @@ function ItemTableWithEditor({
     }
   };
 
+  const handleAdd = async (newItem) => {
+    try {
+      const added = await postItem(newItem); // pass `postItem` as a prop
+      setItems((prev) => [...prev, added]);
+      toast.success(`${title} added!`);
+      setIsAdding(false);
+    } catch (err) {
+      console.error('Failed to add item:', err);
+      toast.error(`Failed to add ${title.toLowerCase()}`);
+    }
+  };
+
+  const handleDelete = async (itemToDelete) => {
+    try {
+      await deleteItem(itemToDelete.item_id);
+      setItems((prev) => prev.filter((i) => getId(i) !== getId(itemToDelete)));
+      toast.success(`${title} deleted.`);
+      setEditingItem(null);
+    } catch (err) {
+      console.error('Delete failed:', err);
+      toast.error(`Failed to delete ${title.toLowerCase()}`);
+    }
+  };
+
   const handleRowClick = (item) => {
     setEditingItem(item);
   };
+
+  const getBuffName = (id) => buffs.find((b) => b.buff_id === id)?.name ?? 'No buff';
 
   return (
     <div className="category-table-container">
@@ -163,15 +198,20 @@ function ItemTableWithEditor({
                   onClick={() => handleRowClick(item)}
                 >
                   {columns.map((col) => (
-                    <td key={col.field}>{item[col.field]}</td>
+                    <td key={col.field}>
+                      {col.field === 'buff_id' ? getBuffName(item[col.field]) : item[col.field]}
+                    </td>
                   ))}
                   <td></td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <button className="add-row-button" onClick={() => setIsAdding(true)}>
+            + Add Row
+          </button>
 
-          {/* ✅ Modal rendered outside the table */}
+          {/* Modal rendered outside the table */}
           {editingItem && (
             <ItemEditorCard
               item={editingItem}
@@ -179,6 +219,15 @@ function ItemTableWithEditor({
               buffs={buffs}
               onSave={handleSave}
               onCancel={() => setEditingItem(null)}
+              onDelete={handleDelete}
+            />
+          )}
+          {isAdding && (
+            <ItemAddCard
+              columns={editorColumns}
+              buffs={buffs}
+              onAdd={handleAdd}
+              onCancel={() => setIsAdding(false)}
             />
           )}
         </>

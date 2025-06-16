@@ -3,19 +3,23 @@ import { FaSave, FaTimes, FaEdit } from 'react-icons/fa';
 import Select from 'react-select/creatable';
 import './ItemEditorCard.css';
 
-function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
+function ItemEditorCard({ item, columns, buffs, onSave, onCancel, onDelete }) {
   const [editedItem, setEditedItem] = useState(item);
   const [isEditing, setIsEditing] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const modalRef = useRef(null);
   const nameInputRef = useRef(null);
+  const [showImagePopup, setShowImagePopup] = useState(false);
+  const imageRef = useRef(null);
 
   useEffect(() => {
     setEditedItem(item);
     setIsEditing(false);
     setIsDirty(false);
     setIsSaving(false);
+    setImageError(false);
   }, [item]);
 
   useEffect(() => {
@@ -56,6 +60,7 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
     };
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
+        if (showImagePopup) return;
         handleClose();
       }
     };
@@ -65,9 +70,12 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isEditing, isDirty, item]);
+  }, [isEditing, isDirty, item, showImagePopup]);
 
   const handleChange = (field, value) => {
+    if (field === 'image_url') {
+      setImageError(false);
+    }
     setEditedItem((prev) => ({ ...prev, [field]: value }));
     setIsDirty(true);
   };
@@ -113,21 +121,28 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
                 }
               >
                 {isEditing ? (
-                  col.field === 'description' ? (
-                    <textarea
-                      className="full-width"
-                      value={editedItem[col.field] || ''}
-                      onChange={(e) => handleChange(col.field, e.target.value)}
-                    />
-                  ) : (
-                    <input
-                      ref={col.field === 'name' ? nameInputRef : null}
-                      className="full-width"
-                      type="text"
-                      value={editedItem[col.field] || ''}
-                      onChange={(e) => handleChange(col.field, e.target.value)}
-                    />
-                  )
+                  <>
+                    <label className="field-label" htmlFor={col.field}>
+                      {col.label}
+                    </label>
+                    {col.field === 'description' ? (
+                      <textarea
+                        id={col.field}
+                        className="full-width"
+                        value={editedItem[col.field] || ''}
+                        onChange={(e) => handleChange(col.field, e.target.value)}
+                      />
+                    ) : (
+                      <input
+                        id={col.field}
+                        ref={col.field === 'name' ? nameInputRef : null}
+                        className="full-width"
+                        type="text"
+                        value={editedItem[col.field] || ''}
+                        onChange={(e) => handleChange(col.field, e.target.value)}
+                      />
+                    )}
+                  </>
                 ) : (
                   <span>
                     {editedItem[col.field] || <span className="placeholder">{col.label}</span>}
@@ -152,65 +167,72 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
                 return (
                   <div key={col.field} className={isEditing ? 'buff-input' : 'inline-display'}>
                     {isEditing ? (
-                      col.field === 'buff_id' ? (
-                        <Select
-                          className="buff-select"
-                          classNamePrefix="buff"
-                          placeholder="Select Buff"
-                          value={
-                            buffOptions.find((opt) => opt.value === editedItem.buff_id) || null
-                          }
-                          onChange={(selectedOption) => {
-                            handleChange('buff_id', selectedOption?.value ?? null);
-                          }}
-                          options={buffOptions}
-                          isClearable={false}
-                          menuPortalTarget={document.body}
-                          menuPosition="fixed"
-                          styles={{
-                            control: (base) => ({
-                              ...base,
-                              height: '38px',
-                              minHeight: '38px',
-                              borderRadius: '4px',
-                              border: '1px solid #ccc',
-                              boxShadow: 'none',
-                            }),
-                            valueContainer: (base) => ({
-                              ...base,
-                              height: '38px',
-                              padding: '0 10px',
-                              display: 'flex',
-                              alignItems: 'center',
-                            }),
-                            singleValue: (base) => ({
-                              ...base,
-                              lineHeight: '1',
-                              alignSelf: 'center',
-                            }),
-                            input: (base) => ({
-                              ...base,
-                              margin: '0',
-                              padding: '0',
-                            }),
-                            indicatorsContainer: (base) => ({
-                              ...base,
-                              height: '38px',
-                            }),
-                            menuPortal: (base) => ({
-                              ...base,
-                              zIndex: 9999,
-                            }),
-                          }}
-                        />
-                      ) : (
-                        <input
-                          className="full-width"
-                          type="text"
-                          value={editedItem[col.field] || ''}
-                          onChange={(e) => handleChange(col.field, e.target.value)}
-                        />
-                      )
+                      <>
+                        <label className="field-label" htmlFor={col.field}>
+                          {col.label}
+                        </label>
+                        {col.field === 'buff_id' ? (
+                          <Select
+                            inputId={col.field}
+                            className="buff-select"
+                            classNamePrefix="buff"
+                            placeholder="Select Buff"
+                            value={
+                              buffOptions.find((opt) => opt.value === editedItem.buff_id) || null
+                            }
+                            onChange={(selectedOption) => {
+                              handleChange('buff_id', selectedOption?.value ?? null);
+                            }}
+                            options={buffOptions}
+                            isClearable={false}
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            styles={{
+                              control: (base) => ({
+                                ...base,
+                                height: '38px',
+                                minHeight: '38px',
+                                borderRadius: '4px',
+                                border: '1px solid #ccc',
+                                boxShadow: 'none',
+                              }),
+                              valueContainer: (base) => ({
+                                ...base,
+                                height: '38px',
+                                padding: '0 10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                              }),
+                              singleValue: (base) => ({
+                                ...base,
+                                lineHeight: '1',
+                                alignSelf: 'center',
+                              }),
+                              input: (base) => ({
+                                ...base,
+                                margin: '0',
+                                padding: '0',
+                              }),
+                              indicatorsContainer: (base) => ({
+                                ...base,
+                                height: '38px',
+                              }),
+                              menuPortal: (base) => ({
+                                ...base,
+                                zIndex: 9999,
+                              }),
+                            }}
+                          />
+                        ) : (
+                          <input
+                            id={col.field}
+                            className="full-width"
+                            type="text"
+                            value={editedItem[col.field] || ''}
+                            onChange={(e) => handleChange(col.field, e.target.value)}
+                          />
+                        )}
+                      </>
                     ) : (
                       <>
                         <span>{value || <span className="placeholder">{col.label}</span>}</span>
@@ -226,11 +248,24 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
           </div>
 
           <div className="editor-side">
-            {editedItem.image_url ? (
-              <img src={editedItem.image_url} alt={editedItem.name} className="image-preview" />
-            ) : (
-              <div className="image-placeholder" />
-            )}
+            <div className="image-container" ref={imageRef}>
+              {!imageError && editedItem.image_url ? (
+                <img
+                  src={editedItem.image_url}
+                  alt={editedItem.name}
+                  className="image-preview"
+                  onError={() => setImageError(true)}
+                  onClick={() => isEditing && setShowImagePopup(true)}
+                />
+              ) : (
+                <div
+                  className="image-placeholder"
+                  onClick={() => isEditing && setShowImagePopup(true)}
+                >
+                  {isEditing ? <span>Click to add image URL</span> : 'No Image'}
+                </div>
+              )}
+            </div>
 
             {valueFields.map((col) => (
               <div
@@ -238,12 +273,18 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
                 className={isEditing ? 'item-value' : 'inline-display item-value'}
               >
                 {isEditing ? (
-                  <input
-                    className="full-width"
-                    type="text"
-                    value={editedItem[col.field] || ''}
-                    onChange={(e) => handleChange(col.field, e.target.value)}
-                  />
+                  <>
+                    <label className="field-label" htmlFor={col.field}>
+                      {col.label}
+                    </label>
+                    <input
+                      id={col.field}
+                      className="full-width"
+                      type="text"
+                      value={editedItem[col.field] || ''}
+                      onChange={(e) => handleChange(col.field, e.target.value)}
+                    />
+                  </>
                 ) : (
                   <span>
                     {editedItem[col.field] || <span className="placeholder">{col.label}</span>}
@@ -271,6 +312,17 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
               <button className="cancel-button" onClick={handleCancel} disabled={isSaving}>
                 <FaTimes /> Cancel
               </button>
+              <button
+                className="delete-button"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this item?')) {
+                    onDelete(item);
+                  }
+                }}
+                disabled={isSaving}
+              >
+                🗑 Delete
+              </button>
             </>
           ) : (
             <button className="edit-button" onClick={() => setIsEditing(true)}>
@@ -278,6 +330,35 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel }) {
             </button>
           )}
         </div>
+        {isEditing && showImagePopup && (
+          <div className="image-url-popup">
+            <label className="field-label" htmlFor="image_url">
+              Image Url
+            </label>
+            <input
+              className="image-url-input"
+              type="text"
+              id="image_url"
+              value={editedItem.image_url || ''}
+              placeholder="Paste image URL"
+              onChange={(e) => handleChange('image_url', e.target.value)}
+              onBlur={() => setShowImagePopup(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  setShowImagePopup(false);
+                }
+                if (e.key === 'Escape') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setEditedItem((prev) => ({ ...prev, image_url: item.image_url }));
+                  setShowImagePopup(false);
+                }
+              }}
+              autoFocus
+            />
+          </div>
+        )}
       </div>
     </div>
   );

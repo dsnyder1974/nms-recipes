@@ -109,7 +109,6 @@
   width: 125px;
 }
 
-/* FINAL Add row fix */
 .add-category-row {
   border-top: 2px solid #ccc;
 }
@@ -202,6 +201,10 @@
 
 .add-button:hover {
   color: #2e7d32;
+}
+
+.clickable-row {
+  cursor: pointer;
 }
 
 .category-row td button {
