@@ -162,6 +162,12 @@
   display: block;
 }
 
+.inline-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* Actions */
 .editor-actions {
   display: flex;
@@ -172,7 +178,9 @@
 
 .save-button,
 .cancel-button,
-.edit-button {
+.edit-button,
+.delete-button,
+.add-row-button {
   padding: 8px 14px;
   font-size: 0.95rem;
   border-radius: 6px;
@@ -181,11 +189,16 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: background-color 0.2s ease;
 }
 
 .save-button {
-  background-color: #007bff;
+  background-color: #28a745;
   color: white;
+}
+
+.save-button:hover {
+  background-color: #218838;
 }
 
 .save-button:disabled {
@@ -194,8 +207,31 @@
 }
 
 .cancel-button {
-  background-color: #eee;
-  color: black;
+  background-color: #6c757d;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #545b62;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #a71d2a;
+}
+
+.add-row-button {
+  background-color: #007bff;
+  color: white;
+  margin-top: 12px;
+}
+
+.add-row-button:hover {
+  background-color: #0056b3;
 }
 
 .edit-button {
@@ -203,7 +239,10 @@
   color: white;
 }
 
-/* Static display */
+.edit-button:hover {
+  background-color: #218838;
+}
+
 .inline-display {
   margin-bottom: 12px;
 }

@@ -157,12 +157,13 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel, onDelete }) {
                   <strong>Ingestor Buff:</strong>
                 </div>
               )}
-              {buffFields.map((col, idx) => {
-                const value =
-                  col.field === 'buff_id'
-                    ? buffOptions.find((opt) => opt.value === editedItem.buff_id)?.label ||
-                      'No Buff'
-                    : editedItem[col.field] || '';
+              {buffFields.map((col) => {
+                const isBuffId = col.field === 'buff_id';
+                const hasBuff = editedItem.buff_id !== null;
+
+                const value = isBuffId
+                  ? buffOptions.find((opt) => opt.value === editedItem.buff_id)?.label || 'No Buff'
+                  : editedItem[col.field] || '';
 
                 return (
                   <div key={col.field} className={isEditing ? 'buff-input' : 'inline-display'}>
@@ -171,7 +172,7 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel, onDelete }) {
                         <label className="field-label" htmlFor={col.field}>
                           {col.label}
                         </label>
-                        {col.field === 'buff_id' ? (
+                        {isBuffId ? (
                           <Select
                             inputId={col.field}
                             className="buff-select"
@@ -180,9 +181,9 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel, onDelete }) {
                             value={
                               buffOptions.find((opt) => opt.value === editedItem.buff_id) || null
                             }
-                            onChange={(selectedOption) => {
-                              handleChange('buff_id', selectedOption?.value ?? null);
-                            }}
+                            onChange={(selectedOption) =>
+                              handleChange('buff_id', selectedOption?.value ?? null)
+                            }
                             options={buffOptions}
                             isClearable={false}
                             menuPortalTarget={document.body}
@@ -235,10 +236,16 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel, onDelete }) {
                       </>
                     ) : (
                       <>
-                        <span>{value || <span className="placeholder">{col.label}</span>}</span>
-                        {idx === buffFields.length - 1 && (
-                          <span className="buff-suffix"> minutes</span>
-                        )}
+                        {isBuffId ? (
+                          <span>{value}</span>
+                        ) : hasBuff ? (
+                          <>
+                            <span>
+                              {value}
+                              {col.unit && <span className="buff-suffix"> {col.unit}</span>}
+                            </span>
+                          </>
+                        ) : null}
                       </>
                     )}
                   </div>
@@ -267,31 +274,35 @@ function ItemEditorCard({ item, columns, buffs, onSave, onCancel, onDelete }) {
               )}
             </div>
 
-            {valueFields.map((col) => (
-              <div
-                key={col.field}
-                className={isEditing ? 'item-value' : 'inline-display item-value'}
-              >
-                {isEditing ? (
-                  <>
-                    <label className="field-label" htmlFor={col.field}>
-                      {col.label}
-                    </label>
-                    <input
-                      id={col.field}
-                      className="full-width"
-                      type="text"
-                      value={editedItem[col.field] || ''}
-                      onChange={(e) => handleChange(col.field, e.target.value)}
-                    />
-                  </>
-                ) : (
-                  <span>
-                    {editedItem[col.field] || <span className="placeholder">{col.label}</span>}
-                  </span>
-                )}
-              </div>
-            ))}
+            {valueFields.map((col) => {
+              const value = editedItem[col.field];
+              return (
+                <div
+                  key={col.field}
+                  className={isEditing ? 'item-value' : 'inline-display item-value'}
+                >
+                  {isEditing ? (
+                    <>
+                      <label className="field-label" htmlFor={col.field}>
+                        {col.label}
+                      </label>
+                      <input
+                        id={col.field}
+                        className="full-width"
+                        type="text"
+                        value={editedItem[col.field] || ''}
+                        onChange={(e) => handleChange(col.field, e.target.value)}
+                      />
+                    </>
+                  ) : (
+                    <div className="inline-with-unit">
+                      <span>{value || <span className="placeholder">{col.label}</span>}</span>
+                      {value && col.unit && <span className="buff-suffix">{col.unit}</span>}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

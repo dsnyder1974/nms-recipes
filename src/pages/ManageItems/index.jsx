@@ -17,8 +17,14 @@ const editorColumns = [
   { field: 'description', label: 'Description', editable: true, group: 'main' },
   { field: 'buff_id', label: 'Buff Name', editable: true, group: 'buff' },
   { field: 'buff_bonus_text', label: 'Buff Bonus', editable: true, group: 'buff' },
-  { field: 'buff_duration_minutes', label: 'Buff Duration (min)', editable: true, group: 'buff' },
-  { field: 'value', label: 'Value', editable: true, group: 'value' },
+  {
+    field: 'buff_duration_minutes',
+    label: 'Buff Duration (min)',
+    editable: true,
+    group: 'buff',
+    unit: 'minutes',
+  },
+  { field: 'value', label: 'Value', editable: true, group: 'value', unit: 'units' },
 ];
 
 const ManageItems = () => {
