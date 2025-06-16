@@ -8,7 +8,7 @@ function Layout() {
     <div className="layout">
       <div className="header-container">
         <img src="/no mans sky header.png" alt="NMS Recipes Header" className="header-image" />
-        <h1 className="header-title">No Man&apos;s Sky Recipes</h1>
+        <h1 className="header-title">No Man&apos;s Sky Ingestor Buffs</h1>
       </div>
 
       <nav className="navbar">
