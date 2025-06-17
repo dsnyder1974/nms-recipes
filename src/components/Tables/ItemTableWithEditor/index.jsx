@@ -3,9 +3,11 @@ import { toast } from 'react-toastify';
 import { FaSpinner } from 'react-icons/fa';
 import ItemEditorCard from './ItemEditorCard';
 import ItemAddCard from './ItemAddCard';
+import { getItemWithCategories } from '../../../api/itemApi';
 import { fetchBuffs } from '../../../api/buffApi';
 import { fetchCategories } from '../../../api/categoryApi';
-import { fetchItemsCategories } from '../../../api/itemCategoryApi';
+import { fetchItemsCategories, patchCategoriesByItem } from '../../../api/itemCategoryApi';
+
 import Select from 'react-select/creatable';
 
 import './DataTable.css';
@@ -126,8 +128,17 @@ function ItemTableWithEditor({
 
   const handleSave = async (updatedItem) => {
     try {
+      console.log('Saving item:', updatedItem);
       const saved = await patchItem(updatedItem);
-      setItems((prev) => prev.map((item) => (getId(item) === getId(saved) ? saved : item)));
+      if (Array.isArray(updatedItem.categories)) {
+        await patchCategoriesByItem(updatedItem);
+      }
+      const refreshItem = await getItemWithCategories(saved.item_id);
+      console.log('Refreshed item:', refreshItem);
+
+      setItems((prev) =>
+        prev.map((item) => (getId(item) === getId(refreshItem) ? refreshItem : item))
+      );
       toast.success(`${title} updated!`);
       // setEditingItem(null);
     } catch (err) {
@@ -138,7 +149,7 @@ function ItemTableWithEditor({
 
   const handleAdd = async (newItem) => {
     try {
-      const added = await postItem(newItem); // pass `postItem` as a prop
+      const added = await postItem(newItem);
       setItems((prev) => [...prev, added]);
       toast.success(`${title} added!`);
       setIsAdding(false);
@@ -327,6 +338,7 @@ function ItemTableWithEditor({
               item={editingItem}
               columns={editorColumns}
               buffs={buffs}
+              allCategories={allCategories}
               onSave={handleSave}
               onCancel={() => setEditingItem(null)}
               onDelete={handleDelete}

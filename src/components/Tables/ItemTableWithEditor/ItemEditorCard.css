@@ -168,6 +168,25 @@
   gap: 4px;
 }
 
+.category-info {
+  margin-top: 12px;
+}
+
+.category-badge-container {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.category-badge {
+  background-color: #e0f0ff;
+  color: #003366;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
 /* Actions */
 .editor-actions {
   display: flex;
