@@ -4,6 +4,10 @@ import { FaSpinner } from 'react-icons/fa';
 import ItemEditorCard from './ItemEditorCard';
 import ItemAddCard from './ItemAddCard';
 import { fetchBuffs } from '../../../api/buffApi';
+import { fetchCategories } from '../../../api/categoryApi';
+import { fetchItemsCategories } from '../../../api/itemCategoryApi';
+import Select from 'react-select/creatable';
+
 import './DataTable.css';
 
 function ItemTableWithEditor({
@@ -24,12 +28,32 @@ function ItemTableWithEditor({
   const [editingItem, setEditingItem] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [buffs, setBuffs] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
   useEffect(() => {
     const loadItems = async () => {
       try {
-        const data = await fetchData();
-        setItems(data);
+        const [items, allItemCategories] = await Promise.all([
+          fetchData(),
+          fetchItemsCategories(), // fetch ALL category associations
+        ]);
+
+        // group categories by item_id
+        const categoriesByItem = allItemCategories.reduce((acc, row) => {
+          const { item_id, category_id, name } = row;
+          if (!acc[item_id]) acc[item_id] = [];
+          acc[item_id].push({ category_id, name });
+          return acc;
+        }, {});
+
+        // merge into items
+        const enrichedItems = items.map((item) => ({
+          ...item,
+          categories: categoriesByItem[item.item_id] || [],
+        }));
+
+        setItems(enrichedItems);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error(`Failed to fetch ${title.toLowerCase()}`);
@@ -42,17 +66,18 @@ function ItemTableWithEditor({
   }, [fetchData, title]);
 
   useEffect(() => {
-    const loadBuffs = async () => {
+    const loadBuffsAndCategories = async () => {
       try {
-        const data = await fetchBuffs();
-        setBuffs(data);
+        const [buffsData, categoriesData] = await Promise.all([fetchBuffs(), fetchCategories()]);
+        setBuffs(buffsData);
+        setAllCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching buffs:', error);
-        toast.error('Failed to fetch buffs');
+        console.error('Error fetching buffs or categories:', error);
+        toast.error('Failed to fetch buffs or categories');
       }
     };
 
-    loadBuffs();
+    loadBuffsAndCategories();
   }, []);
 
   const handleSort = (field) => {
@@ -83,16 +108,21 @@ function ItemTableWithEditor({
 
   const filteredItems = useMemo(() => {
     return sortedItems.filter((item) => {
-      return Object.entries(item).some(([key, val]) => {
+      const matchesText = Object.entries(item).some(([key, val]) => {
         if (key === 'buff_id') {
           const buffName = buffs.find((b) => b.buff_id === val)?.name ?? '';
           return buffName.toLowerCase().includes(filterText.toLowerCase());
         }
-
         return val?.toString().toLowerCase().includes(filterText.toLowerCase());
       });
+
+      const matchesCategory =
+        !selectedCategoryId ||
+        (item.categories || []).some((cat) => cat.category_id === selectedCategoryId);
+
+      return matchesText && matchesCategory;
     });
-  }, [sortedItems, filterText, buffs]);
+  }, [sortedItems, filterText, selectedCategoryId, buffs]);
 
   const handleSave = async (updatedItem) => {
     try {
@@ -148,6 +178,63 @@ function ItemTableWithEditor({
           onChange={(e) => setFilterText(e.target.value)}
           className="filter-input"
         />
+
+        <div style={{ marginLeft: '12px', minWidth: '240px' }}>
+          <Select
+            isClearable
+            placeholder="Filter by category"
+            value={
+              selectedCategoryId
+                ? {
+                    value: selectedCategoryId,
+                    label: allCategories.find((c) => c.category_id === selectedCategoryId)?.name,
+                  }
+                : null
+            }
+            onChange={(selected) => {
+              setSelectedCategoryId(selected ? selected.value : null);
+            }}
+            options={[
+              { value: null, label: 'All Categories' },
+              ...allCategories.map((cat) => ({
+                value: cat.category_id,
+                label: cat.name,
+              })),
+            ]}
+            styles={{
+              container: (base) => ({ ...base, fontSize: '0.9rem' }),
+              control: (base, state) => ({
+                ...base,
+                minHeight: '36px',
+                height: '36px',
+                borderColor: state.isFocused ? '#2684FF' : base.borderColor,
+                boxShadow: state.isFocused ? '0 0 0 1px #2684FF' : base.boxShadow,
+              }),
+              valueContainer: (base) => ({
+                ...base,
+                height: '36px',
+                padding: '0 8px',
+              }),
+              indicatorsContainer: (base) => ({
+                ...base,
+                height: '36px',
+              }),
+              input: (base) => ({
+                ...base,
+                margin: 0,
+                padding: 0,
+              }),
+              dropdownIndicator: (base) => ({
+                ...base,
+                padding: '4px',
+              }),
+              clearIndicator: (base) => ({
+                ...base,
+                padding: '4px',
+              }),
+            }}
+          />
+        </div>
       </div>
 
       {isLoading ? (
@@ -199,7 +286,30 @@ function ItemTableWithEditor({
                 >
                   {columns.map((col) => (
                     <td key={col.field}>
-                      {col.field === 'buff_id' ? getBuffName(item[col.field]) : item[col.field]}
+                      {col.field === 'buff_id' ? (
+                        getBuffName(item[col.field])
+                      ) : col.field === 'name' ? (
+                        <>
+                          <div>
+                            {typeof item[col.field] === 'object'
+                              ? '[Invalid name]'
+                              : item[col.field]}
+                          </div>
+                          {Array.isArray(item.categories) && item.categories.length > 0 && (
+                            <div className="category-badge-container">
+                              {item.categories.map((cat) => (
+                                <span key={cat.category_id} className="category-badge">
+                                  {cat.name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      ) : typeof item[col.field] === 'object' ? (
+                        JSON.stringify(item[col.field])
+                      ) : (
+                        item[col.field]
+                      )}
                     </td>
                   ))}
                   <td></td>

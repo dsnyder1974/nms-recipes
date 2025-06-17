@@ -14,6 +14,12 @@
 }
 
 .datatable-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap; /* allow wrap on small screens */
   margin-bottom: 12px;
 }
 
@@ -261,6 +267,27 @@
 .no-image {
   color: #999;
   font-style: italic;
+}
+
+.category-badge-container {
+  margin-top: 4px;
+}
+
+.category-badge {
+  display: inline-block;
+  background-color: #e0f0ff;
+  color: #003366;
+  padding: 2px 8px;
+  margin: 0 4px 4px 0;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.category-select {
+  margin-left: 12px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {
