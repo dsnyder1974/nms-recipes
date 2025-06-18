@@ -28,7 +28,6 @@ export async function fetchCategoriesByItem(item_id) {
 
 export async function patchCategoriesByItem(updatedItem) {
   const categoryIds = (updatedItem.categories ?? []).map((c) => c.category_id);
-
   const response = await fetch(
     `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgPatchCategoriesByItem/${updatedItem.item_id}`,
     {

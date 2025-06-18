@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FaSave, FaTimes, FaEdit } from 'react-icons/fa';
-import Select from 'react-select/creatable';
+import Select from 'react-select';
 import './ItemEditorCard.css';
 
 function ItemEditorCard({ item, columns, buffs, allCategories, onSave, onCancel, onDelete }) {
@@ -103,9 +103,12 @@ function ItemEditorCard({ item, columns, buffs, allCategories, onSave, onCancel,
   return (
     <div className="editor-modal-overlay">
       <div className="editor-modal" ref={modalRef}>
-        <button className="close-button" onClick={handleClose} title="Close" aria-label="Close">
-          &times;
-        </button>
+        <div className="editor-header">
+          <h2 className="editor-title">{isEditing ? 'Edit Item' : 'Item Details'}</h2>
+          <button className="close-button" onClick={handleClose} title="Close" aria-label="Close">
+            &times;
+          </button>
+        </div>
 
         <div className="editor-card-layout">
           <div className="editor-main">

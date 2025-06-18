@@ -150,7 +150,14 @@ function ItemTableWithEditor({
   const handleAdd = async (newItem) => {
     try {
       const added = await postItem(newItem);
-      setItems((prev) => [...prev, added]);
+      if (Array.isArray(newItem.categories) && newItem.categories.length > 0) {
+        await patchCategoriesByItem({
+          item_id: added.item_id,
+          categories: newItem.categories,
+        });
+      }
+      const addedItem = await getItemWithCategories(added.item_id);
+      setItems((prev) => [...prev, addedItem]);
       toast.success(`${title} added!`);
       setIsAdding(false);
     } catch (err) {
@@ -348,6 +355,7 @@ function ItemTableWithEditor({
             <ItemAddCard
               columns={editorColumns}
               buffs={buffs}
+              allCategories={allCategories}
               onAdd={handleAdd}
               onCancel={() => setIsAdding(false)}
             />

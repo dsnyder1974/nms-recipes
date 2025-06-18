@@ -15,7 +15,7 @@
 /* Modal container */
 .editor-modal {
   background: #fff;
-  padding: 48px 24px 16px;
+  padding: 0 24px 16px;
   border-radius: 10px;
   max-width: 640px;
   width: 90%;
@@ -29,6 +29,38 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 32px;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 0;
+  margin-bottom: 1rem;
+}
+
+/* Close "X" */
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  z-index: 10;
+  margin-right: -16px;
+}
+
+.close-button:hover {
+  color: #000;
+}
+
+.editor-header .close-button {
+  position: static;
+  font-size: 1.5rem;
+  margin-left: auto;
 }
 
 /* Main fields */
@@ -149,9 +181,9 @@
 }
 
 /* Static view name field */
-.inline-display.name-field span {
+.inline-display.name-field {
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
 }
 
 /* Static view value field */
@@ -269,23 +301,6 @@
 .placeholder {
   color: #aaa;
   font-style: italic;
-}
-
-/* Close "X" */
-.close-button {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  font-size: 1.5rem;
-  background: none;
-  border: none;
-  color: #333;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.close-button:hover {
-  color: #000;
 }
 
 .spinner {

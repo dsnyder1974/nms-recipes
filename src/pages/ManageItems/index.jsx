@@ -12,7 +12,7 @@ const columns = [
 ];
 
 const editorColumns = [
-  { field: 'name', label: 'Name', editable: true, group: 'main' },
+  { field: 'name', label: 'Name', editable: true, required: true, group: 'main' },
   { field: 'item_id', label: 'Item ID', editable: false, group: 'main' },
   { field: 'description', label: 'Description', editable: true, group: 'main' },
   { field: 'buff_id', label: 'Buff Name', editable: true, group: 'buff' },

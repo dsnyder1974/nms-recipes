@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import Select from 'react-select/creatable';
+import Select from 'react-select';
 import './ItemEditorCard.css';
 
-function ItemAddCard({ columns, buffs, onAdd, onCancel }) {
-  const [newItem, setNewItem] = useState({});
+function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
+  const [newItem, setNewItem] = useState({ categories: [] });
   const [isSaving, setIsSaving] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [showImagePopup, setShowImagePopup] = useState(false);
@@ -50,7 +50,30 @@ function ItemAddCard({ columns, buffs, onAdd, onCancel }) {
     setNewItem((prev) => ({ ...prev, [field]: value }));
   };
 
+  const validateItem = () => {
+    const missingFields = columns
+      .filter((col) => col.required)
+      .filter((col) => {
+        const value = newItem[col.field];
+        return (
+          value === undefined ||
+          value === '' ||
+          value === null ||
+          (Array.isArray(value) && value.length === 0)
+        );
+      });
+
+    return missingFields.map((col) => col.label);
+  };
+
   const handleSubmit = async () => {
+    const missing = validateItem();
+    console.log('Missing fields:', missing);
+    if (missing.length > 0) {
+      alert(`Please fill out: ${missing.join(', ')}`);
+      return;
+    }
+
     setIsSaving(true);
     try {
       await onAdd(newItem);
@@ -65,7 +88,7 @@ function ItemAddCard({ columns, buffs, onAdd, onCancel }) {
         <button className="close-button" onClick={onCancel}>
           &times;
         </button>
-
+        <h2 className="editor-title">Add Item</h2>
         <div className="editor-card-layout">
           <div className="editor-main">
             {mainFields.map((col) => (
@@ -76,6 +99,7 @@ function ItemAddCard({ columns, buffs, onAdd, onCancel }) {
                 <label className="field-label" htmlFor={col.field}>
                   {col.label}
                 </label>
+
                 {col.field === 'description' ? (
                   <textarea
                     id={col.field}
@@ -93,8 +117,58 @@ function ItemAddCard({ columns, buffs, onAdd, onCancel }) {
                     onChange={(e) => handleChange(col.field, e.target.value)}
                   />
                 )}
+                {col.required && <span className="required-hint">Required</span>}
               </div>
             ))}
+
+            <div className="categories-select">
+              <label className="field-label">Categories</label>
+              {columns.find((c) => c.field === 'categories' && c.required) && (
+                <span className="required-hint">Required</span>
+              )}
+              <Select
+                isMulti
+                isClearable
+                placeholder="Select categories..."
+                value={
+                  newItem.categories?.map((cat) => ({
+                    value: cat.category_id,
+                    label: cat.name,
+                  })) || []
+                }
+                onChange={(selected) => {
+                  const categories =
+                    selected?.map((s) => ({
+                      category_id: s.value,
+                      name: s.label,
+                    })) || [];
+                  setNewItem((prev) => ({ ...prev, categories }));
+                }}
+                options={allCategories.map((cat) => ({
+                  value: cat.category_id,
+                  label: cat.name,
+                }))}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    minHeight: '38px',
+                    borderRadius: '4px',
+                    border: '1px solid #ccc',
+                    boxShadow: 'none',
+                  }),
+                  valueContainer: (base) => ({
+                    ...base,
+                    padding: '2px 8px',
+                  }),
+                  menuPortal: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                  }),
+                }}
+              />
+            </div>
 
             <div className="buff-info">
               {buffFields.map((col) => (
@@ -102,6 +176,7 @@ function ItemAddCard({ columns, buffs, onAdd, onCancel }) {
                   <label className="field-label" htmlFor={col.field}>
                     {col.label}
                   </label>
+                  {col.required && <span className="required-hint">Required</span>}
                   {col.field === 'buff_id' ? (
                     <Select
                       inputId={col.field}
@@ -187,6 +262,7 @@ function ItemAddCard({ columns, buffs, onAdd, onCancel }) {
                 <label className="field-label" htmlFor={col.field}>
                   {col.label}
                 </label>
+                {col.required && <span className="required-hint">Required</span>}
                 <input
                   id={col.field}
                   className="full-width"
