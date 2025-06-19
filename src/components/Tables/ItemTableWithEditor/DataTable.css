@@ -38,7 +38,7 @@
 }
 
 .category-table-container {
-  max-width: 800px;
+  max-width: 100%;
   margin: 2rem auto;
   background-color: #fff;
   border: 1px solid #ddd;
@@ -51,7 +51,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .category-table th,

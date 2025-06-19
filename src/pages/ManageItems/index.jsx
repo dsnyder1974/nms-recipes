@@ -4,11 +4,17 @@ import ItemTableWithEditor from '../../components/Tables/ItemTableWithEditor';
 import { fetchItems, postItem, patchItem, deleteItem } from '../../api/itemApi';
 
 const columns = [
-  { field: 'item_id', label: 'Item ID', editable: false, width: '125px' },
+  { field: 'item_id', label: 'Item ID', editable: false, width: '80px' },
   { field: 'name', label: 'Name', editable: true, required: true, width: '200px' },
-  { field: 'buff_id', label: 'Buff', editable: true, group: 'buff' },
-  { field: 'buff_bonus_text', label: 'Bonus', editable: true, group: 'buff' },
-  { field: 'buff_duration_minutes', label: 'Duration (min)', editable: true, group: 'buff' },
+  { field: 'buff_id', label: 'Buff', editable: true, group: 'buff', minWidth: '125px' },
+  { field: 'buff_bonus_text', label: 'Bonus', editable: true, group: 'buff', minWidth: '125px' },
+  {
+    field: 'buff_duration_minutes',
+    label: 'Duration (min)',
+    editable: true,
+    group: 'buff',
+    minWidth: '125px',
+  },
 ];
 
 const editorColumns = [

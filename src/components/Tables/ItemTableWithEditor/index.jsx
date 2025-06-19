@@ -282,7 +282,10 @@ function ItemTableWithEditor({
                       if (e.key === 'Enter' || e.key === ' ') handleSort(col.field);
                     }}
                     className="sortable"
-                    style={col.width ? { width: col.width } : {}}
+                    style={{
+                      ...(col.width ? { width: col.width } : {}),
+                      ...(col.minWidth ? { minWidth: col.minWidth } : {}),
+                    }}
                   >
                     <div className="sortable-label-container">
                       <span className="sortable-label">{col.label}</span>

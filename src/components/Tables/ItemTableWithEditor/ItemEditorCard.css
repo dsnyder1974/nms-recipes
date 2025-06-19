@@ -204,6 +204,13 @@
   margin-top: 12px;
 }
 
+.inline-categories-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .category-badge-container {
   margin-top: 4px;
   display: flex;

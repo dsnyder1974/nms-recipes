@@ -258,62 +258,67 @@ function ItemEditorCard({ item, columns, buffs, allCategories, onSave, onCancel,
 
             {/* Category Display Section */}
             <div className="category-info">
-              <label className="field-label">Categories</label>
               {isEditing ? (
-                <Select
-                  isMulti
-                  isClearable
-                  placeholder="Select categories..."
-                  value={
-                    editedItem.categories?.map((cat) => ({
+                <>
+                  <label className="field-label">Categories</label>
+                  <Select
+                    isMulti
+                    isClearable
+                    placeholder="Select categories..."
+                    value={
+                      editedItem.categories?.map((cat) => ({
+                        value: cat.category_id,
+                        label: cat.name,
+                      })) || []
+                    }
+                    onChange={(selected) => {
+                      const categories =
+                        selected?.map((s) => ({
+                          category_id: s.value,
+                          name: s.label,
+                        })) || [];
+                      setEditedItem((prev) => ({ ...prev, categories }));
+                      setIsDirty(true);
+                    }}
+                    options={allCategories.map((cat) => ({
                       value: cat.category_id,
                       label: cat.name,
-                    })) || []
-                  }
-                  onChange={(selected) => {
-                    const categories =
-                      selected?.map((s) => ({
-                        category_id: s.value,
-                        name: s.label,
-                      })) || [];
-                    setEditedItem((prev) => ({ ...prev, categories }));
-                    setIsDirty(true);
-                  }}
-                  options={allCategories.map((cat) => ({
-                    value: cat.category_id,
-                    label: cat.name,
-                  }))}
-                  menuPortalTarget={document.body}
-                  menuPosition="fixed"
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      minHeight: '38px',
-                      borderRadius: '4px',
-                      border: '1px solid #ccc',
-                      boxShadow: 'none',
-                    }),
-                    valueContainer: (base) => ({
-                      ...base,
-                      padding: '2px 8px',
-                    }),
-                    menuPortal: (base) => ({
-                      ...base,
-                      zIndex: 9999,
-                    }),
-                  }}
-                />
+                    }))}
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        minHeight: '38px',
+                        borderRadius: '4px',
+                        border: '1px solid #ccc',
+                        boxShadow: 'none',
+                      }),
+                      valueContainer: (base) => ({
+                        ...base,
+                        padding: '2px 8px',
+                      }),
+                      menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+                    }}
+                  />
+                </>
               ) : (
-                <div className="category-badge-container">
-                  {editedItem.categories?.length > 0 ? (
-                    editedItem.categories.map((cat) => (
-                      <span key={cat.category_id} className="category-badge">
-                        {cat.name}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="placeholder">No categories</span>
-                  )}
+                <div className="inline-categories-row">
+                  <label className="field-label">Categories:</label>
+                  <div className="category-badge-container">
+                    {editedItem.categories?.length > 0 ? (
+                      editedItem.categories.map((cat) => (
+                        <span key={cat.category_id} className="category-badge">
+                          {cat.name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="placeholder">No categories</span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
