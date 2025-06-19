@@ -1,9 +1,10 @@
 @import url('https://font.nmscd.com/assets/font/NMSFuturaProBook_Kerned/Web-TT/NMSFuturaProBook_Kerned.css');
 @import url('https://font.nmscd.com/assets/font/NMSGeoSans_Kerned/Web-TT/NMSGeoSans_Kerned.css');
 
-* {
-  outline: 1px solid rgba(255, 0, 0, 0.3); /* highlight all elements */
-}
+/*Debugging border for all elements*/
+/* * {
+  outline: 1px solid rgba(255, 0, 0, 0.3);
+} */
 
 body {
   font-family: 'NMSFuturaProBook', sans-serif;
