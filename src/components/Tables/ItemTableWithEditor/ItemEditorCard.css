@@ -227,6 +227,10 @@
   font-size: 0.75rem;
 }
 
+.produce-label {
+  margin-top: 1rem;
+}
+
 /* Actions */
 .editor-actions {
   display: flex;
@@ -239,7 +243,8 @@
 .cancel-button,
 .edit-button,
 .delete-button,
-.add-row-button {
+.add-row-button,
+.back-button {
   padding: 8px 14px;
   font-size: 0.95rem;
   border-radius: 6px;
@@ -300,6 +305,14 @@
 
 .edit-button:hover {
   background-color: #218838;
+}
+
+.back-button {
+  background-color: #e0e0e0;
+}
+
+.back-button:hover {
+  background-color: #d0d0d0;
 }
 
 .inline-display {

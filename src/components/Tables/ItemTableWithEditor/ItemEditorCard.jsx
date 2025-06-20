@@ -1,9 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
-import { FaSave, FaTimes, FaEdit } from 'react-icons/fa';
+import { FaSave, FaTimes, FaEdit, FaArrowLeft, FaTrash, FaSpinner } from 'react-icons/fa';
 import Select from 'react-select';
+
+import { getItemRecipes } from '../../../api/recipeApi';
+import RecipeRow from '../../Tables/RecipeRow';
+
 import './ItemEditorCard.css';
 
-function ItemEditorCard({ item, columns, buffs, allCategories, onSave, onCancel, onDelete }) {
+function ItemEditorCard({
+  item,
+  columns,
+  buffs,
+  allCategories,
+  onSave,
+  onCancel,
+  onDelete,
+  onOpenItem,
+  onBack,
+}) {
   const [editedItem, setEditedItem] = useState(item);
   const [isEditing, setIsEditing] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -13,6 +27,9 @@ function ItemEditorCard({ item, columns, buffs, allCategories, onSave, onCancel,
   const nameInputRef = useRef(null);
   const [showImagePopup, setShowImagePopup] = useState(false);
   const imageRef = useRef(null);
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(false);
+
+  const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
     setEditedItem(item);
@@ -20,6 +37,26 @@ function ItemEditorCard({ item, columns, buffs, allCategories, onSave, onCancel,
     setIsDirty(false);
     setIsSaving(false);
     setImageError(false);
+  }, [item]);
+
+  useEffect(() => {
+    const loadRecipes = async () => {
+      setIsLoadingRecipes(true);
+      try {
+        console.log('Fetching recipes for item:', item.item_id);
+        const data = await getItemRecipes(item.item_id);
+        console.log('Fetched recipes:', data);
+        setRecipes(data);
+      } catch (err) {
+        console.error('Failed to fetch recipes:', err);
+      } finally {
+        setIsLoadingRecipes(false);
+      }
+    };
+
+    if (item?.item_id) {
+      loadRecipes();
+    }
   }, [item]);
 
   useEffect(() => {
@@ -375,8 +412,49 @@ function ItemEditorCard({ item, columns, buffs, allCategories, onSave, onCancel,
             })}
           </div>
         </div>
+        {!isEditing && (
+          <div className="recipes-section">
+            {isLoadingRecipes ? (
+              <div style={{ paddingTop: '0.5rem', paddingLeft: '2px' }}>
+                <FaSpinner className="spinner" title="Loading recipes..." />
+              </div>
+            ) : recipes.length > 0 ? (
+              <>
+                <div
+                  className="buff-label"
+                  style={{
+                    marginTop: '1rem',
+                    marginBottom: '0.25rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <strong>Produce by:</strong> <span>Cooking</span>
+                </div>
+                <table className="recipes-table">
+                  <tbody>
+                    {recipes.map((recipe) => (
+                      <RecipeRow
+                        key={recipe.recipe_id}
+                        recipe={recipe}
+                        onIngredientClick={(ingredientId) => onOpenItem?.(ingredientId)}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            ) : null}
+          </div>
+        )}
 
         <div className="editor-actions">
+          {onBack && (
+            <button className="back-button" onClick={onBack}>
+              <FaArrowLeft style={{ marginRight: '6px' }} />
+              Back
+            </button>
+          )}
           {isEditing ? (
             <>
               <button className="save-button" onClick={handleSave} disabled={!isDirty || isSaving}>
@@ -402,7 +480,8 @@ function ItemEditorCard({ item, columns, buffs, allCategories, onSave, onCancel,
                 }}
                 disabled={isSaving}
               >
-                🗑 Delete
+                <FaTrash style={{ marginRight: '6px' }} />
+                Delete
               </button>
             </>
           ) : (

@@ -32,6 +32,7 @@ function ItemTableWithEditor({
   const [buffs, setBuffs] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [itemStack, setItemStack] = useState([]);
 
   useEffect(() => {
     const loadItems = async () => {
@@ -172,9 +173,28 @@ function ItemTableWithEditor({
       setItems((prev) => prev.filter((i) => getId(i) !== getId(itemToDelete)));
       toast.success(`${title} deleted.`);
       setEditingItem(null);
+      setItemStack([]); // clear history
     } catch (err) {
       console.error('Delete failed:', err);
       toast.error(`Failed to delete ${title.toLowerCase()}`);
+    }
+  };
+
+  const handleOpenItem = (newItemId) => {
+    const newItem = items.find((i) => i.item_id === newItemId);
+    if (newItem) {
+      setItemStack((prev) => (editingItem ? [...prev, editingItem] : prev));
+      setEditingItem(newItem);
+    } else {
+      console.warn(`Item with id ${newItemId} not found`);
+    }
+  };
+
+  const handleBack = () => {
+    const previous = itemStack.at(-1);
+    if (previous) {
+      setItemStack((prev) => prev.slice(0, -1));
+      setEditingItem(previous);
     }
   };
 
@@ -350,8 +370,13 @@ function ItemTableWithEditor({
               buffs={buffs}
               allCategories={allCategories}
               onSave={handleSave}
-              onCancel={() => setEditingItem(null)}
+              onCancel={() => {
+                setEditingItem(null);
+                setItemStack([]); // clear history
+              }}
               onDelete={handleDelete}
+              onOpenItem={handleOpenItem}
+              onBack={itemStack.length > 0 ? handleBack : null}
             />
           )}
           {isAdding && (
