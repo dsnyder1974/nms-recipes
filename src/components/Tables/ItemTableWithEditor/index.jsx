@@ -23,6 +23,7 @@ function ItemTableWithEditor({
   title,
 }) {
   const [items, setItems] = useState([]);
+  const [allItemsById, setAllItemsById] = useState({});
   const [sortField, setSortField] = useState(columns[0]?.field || '');
   const [sortDirection, setSortDirection] = useState('asc');
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +58,7 @@ function ItemTableWithEditor({
         }));
 
         setItems(enrichedItems);
+        setAllItemsById(Object.fromEntries(enrichedItems.map((item) => [item.item_id, item])));
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error(`Failed to fetch ${title.toLowerCase()}`);
@@ -366,6 +368,7 @@ function ItemTableWithEditor({
           {editingItem && (
             <ItemEditorCard
               item={editingItem}
+              allItemsById={allItemsById}
               columns={editorColumns}
               buffs={buffs}
               allCategories={allCategories}

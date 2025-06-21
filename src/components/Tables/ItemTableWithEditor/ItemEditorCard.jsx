@@ -9,6 +9,7 @@ import './ItemEditorCard.css';
 
 function ItemEditorCard({
   item,
+  allItemsById,
   columns,
   buffs,
   allCategories,
@@ -420,27 +421,33 @@ function ItemEditorCard({
               </div>
             ) : recipes.length > 0 ? (
               <>
-                <div
-                  className="buff-label"
-                  style={{
-                    marginTop: '1rem',
-                    marginBottom: '0.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <strong>Produce by:</strong> <span>Cooking</span>
+                <div className="buff-label produce-label">
+                  <strong>Produce by:</strong>
                 </div>
                 <table className="recipes-table">
                   <tbody>
-                    {recipes.map((recipe) => (
-                      <RecipeRow
-                        key={recipe.recipe_id}
-                        recipe={recipe}
-                        onIngredientClick={(ingredientId) => onOpenItem?.(ingredientId)}
-                      />
-                    ))}
+                    {recipes.map((recipe) => {
+                      const ingredientIds = [
+                        recipe.ingredient1_id,
+                        recipe.ingredient2_id,
+                        recipe.ingredient3_id,
+                      ].filter(Boolean);
+
+                      const ingredients = ingredientIds.map((id) => ({
+                        id,
+                        name: allItemsById?.[id]?.name || `Item ${id}`,
+                      }));
+                      console.log('Recipe ingredients:', ingredients);
+
+                      return (
+                        <RecipeRow
+                          key={recipe.recipe_id}
+                          recipe={recipe}
+                          ingredients={ingredients}
+                          onIngredientClick={(ingredientId) => onOpenItem?.(ingredientId)}
+                        />
+                      );
+                    })}
                   </tbody>
                 </table>
               </>

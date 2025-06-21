@@ -7,22 +7,6 @@
   vertical-align: top;
 }
 
-.recipe-description {
-  font-size: 0.85rem;
-  color: #666;
-  margin-top: 4px;
-}
-
-.ingredients-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.ingredient-entry {
-  font-size: 0.95rem;
-}
-
 .clickable-ingredient {
   cursor: pointer;
   color: #007bff;
@@ -31,4 +15,28 @@
 
 .clickable-ingredient:hover {
   color: #0056b3;
+}
+
+.recipe-actions-cell {
+  text-align: right;
+  vertical-align: top;
+}
+
+.recipe-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.recipe-meta {
+  font-size: 0.85em;
+  color: #555;
+  margin-left: 6px;
+}
+
+.clickable-ingredient {
+  cursor: pointer;
+  color: #0074cc;
 }
