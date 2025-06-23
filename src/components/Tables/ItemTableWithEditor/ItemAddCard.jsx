@@ -32,6 +32,9 @@ function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
     };
 
     const handleClickOutside = (e) => {
+      if (e.target.closest('.modal-overlay, .dialog')) {
+        return;
+      }
       if (modalRef.current && !modalRef.current.contains(e.target)) {
         onCancel();
       }

@@ -1,6 +1,7 @@
 /* Full-screen overlay */
 .editor-modal-overlay {
   position: fixed;
+  z-index: 900;
   top: 0;
   left: 0;
   width: 100vw;
@@ -10,10 +11,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
 }
 
 /* Modal container */
 .editor-modal {
+  overflow-y: auto;
+  max-height: 90vh;
   background: #fff;
   padding: 0 24px 16px;
   border-radius: 10px;

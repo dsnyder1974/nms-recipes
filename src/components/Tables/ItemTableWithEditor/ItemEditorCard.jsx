@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FaSave, FaTimes, FaEdit, FaArrowLeft, FaTrash, FaSpinner } from 'react-icons/fa';
 import Select from 'react-select';
 
-import { getItemRecipes } from '../../../api/recipeApi';
+import { getItemRecipes, patchRecipe } from '../../../api/recipeApi';
 import RecipeRow from '../../Tables/RecipeRow';
 
 import './ItemEditorCard.css';
@@ -31,6 +31,7 @@ function ItemEditorCard({
   const [isLoadingRecipes, setIsLoadingRecipes] = useState(false);
 
   const [recipes, setRecipes] = useState([]);
+  const [savingRecipeIds, setSavingRecipeIds] = useState([]);
 
   useEffect(() => {
     setEditedItem(item);
@@ -126,6 +127,30 @@ function ItemEditorCard({
       setIsDirty(false);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSaveRecipe = async (updatedRecipe) => {
+    setSavingRecipeIds((prev) => [...prev, updatedRecipe.recipe_id]);
+    try {
+      const savedRecipe = await patchRecipe(updatedRecipe);
+      setRecipes((prev) =>
+        prev.map((r) => (r.recipe_id === savedRecipe.recipe_id ? savedRecipe : r))
+      );
+      console.log('Saved recipe:', savedRecipe);
+    } catch (error) {
+      console.error('Failed to save recipe:', error);
+      window.alert('An error occurred while saving the recipe.');
+    } finally {
+      setSavingRecipeIds((prev) => prev.filter((id) => id !== updatedRecipe.recipe_id));
+    }
+  };
+
+  const handleDeleteRecipe = (recipeToDelete) => {
+    if (window.confirm('Delete this recipe?')) {
+      setRecipes((prev) => prev.filter((r) => r.recipe_id !== recipeToDelete.recipe_id));
+      // TODO: Optionally call API here to delete
+      console.log('Deleted recipe:', recipeToDelete);
     }
   };
 
@@ -437,14 +462,17 @@ function ItemEditorCard({
                         id,
                         name: allItemsById?.[id]?.name || `Item ${id}`,
                       }));
-                      console.log('Recipe ingredients:', ingredients);
 
                       return (
                         <RecipeRow
                           key={recipe.recipe_id}
                           recipe={recipe}
                           ingredients={ingredients}
+                          allItems={Object.values(allItemsById)}
                           onIngredientClick={(ingredientId) => onOpenItem?.(ingredientId)}
+                          onSave={handleSaveRecipe}
+                          onDelete={handleDeleteRecipe}
+                          isSaving={savingRecipeIds.includes(recipe.recipe_id)}
                         />
                       );
                     })}

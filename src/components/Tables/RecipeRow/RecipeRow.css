@@ -1,25 +1,37 @@
 .recipe-row {
-  border-bottom: 1px solid #ddd;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 4px 0;
+  gap: 0.5rem;
+  flex-wrap: wrap; /* allow row wrapping for small screens */
 }
 
 .recipe-cell {
+  flex: 1;
   padding: 8px 12px;
-  vertical-align: top;
+  border-bottom: 1px solid #ddd;
+}
+
+.recipe-actions-cell {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 8px 12px;
+  margin-top: 10px;
+}
+
+.recipe-button-margin {
+  margin: 0.4rem 0.6rem;
 }
 
 .clickable-ingredient {
   cursor: pointer;
-  color: #007bff;
+  color: #0074cc;
   text-decoration: underline;
 }
 
 .clickable-ingredient:hover {
   color: #0056b3;
-}
-
-.recipe-actions-cell {
-  text-align: right;
-  vertical-align: top;
 }
 
 .recipe-line {
@@ -36,7 +48,87 @@
   margin-left: 6px;
 }
 
-.clickable-ingredient {
+.icon-button {
+  background: none;
+  border: none;
   cursor: pointer;
-  color: #0074cc;
+  padding: 4px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.icon-button-edit {
+  color: #28a745;
+}
+
+.icon-button-edit:hover {
+  color: #218838;
+}
+
+.icon-button-delete {
+  color: #dc3545;
+}
+
+.icon-button-delete:hover {
+  color: #c82333;
+}
+
+.recipe-edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ingredient-select-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.ingredient-select {
+  min-width: 220px;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.form-input {
+  padding: 0.4rem;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-input.small {
+  max-width: 80px;
+}
+
+.form-input.medium {
+  max-width: 240px;
+}
+
+.saving-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
