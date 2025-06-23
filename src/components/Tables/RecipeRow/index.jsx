@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash, FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import Select from 'react-select';
 import './RecipeRow.css';
@@ -11,9 +11,18 @@ function RecipeRow({
   onSave,
   onDelete,
   isSaving,
+  isDeleting,
+  isEditing,
+  setEditingRecipeId,
+  forceEditing = false,
 }) {
-  const [isEditing, setIsEditing] = useState(false);
   const [editedRecipe, setEditedRecipe] = useState(recipe);
+
+  useEffect(() => {
+    if (forceEditing) {
+      setEditingRecipeId(recipe.recipe_id);
+    }
+  }, [forceEditing, recipe.recipe_id, setEditingRecipeId]);
 
   const itemOptions = allItems.map((item) => ({
     value: item.item_id,
@@ -30,12 +39,21 @@ function RecipeRow({
 
   const handleSave = async () => {
     await onSave(editedRecipe);
-    setIsEditing(false);
+    setEditingRecipeId(null);
   };
 
   const handleCancel = () => {
-    setEditedRecipe(recipe); // Reset
-    setIsEditing(false);
+    if (recipe.recipe_id === -1) {
+      onDelete(recipe); // cancel new recipe
+    } else {
+      setEditedRecipe(recipe);
+      setEditingRecipeId(null);
+    }
+  };
+
+  const handleEditClick = () => {
+    setEditedRecipe(recipe);
+    setEditingRecipeId(recipe.recipe_id);
   };
 
   const ingredientText = ingredients.map((ing, index) => (
@@ -177,24 +195,26 @@ function RecipeRow({
                   <FaSave />
                   Save
                 </button>
-
                 <button
                   onClick={handleCancel}
                   className="cancel-button recipe-button-margin"
-                  // className="icon-button icon-button-delete"
                   title="Cancel"
                 >
                   <FaTimes /> Cancel
                 </button>
               </>
             )
+          ) : isDeleting ? (
+            <span className="saving-indicator">
+              <FaSpinner className="spinner" /> Deleting...
+            </span>
           ) : (
             <>
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={handleEditClick}
                 className="icon-button icon-button-edit"
                 title="Edit"
-                disabled={isSaving}
+                disabled={isSaving || isDeleting}
               >
                 <FaEdit />
               </button>
@@ -202,7 +222,7 @@ function RecipeRow({
                 onClick={() => onDelete(recipe)}
                 className="icon-button icon-button-delete"
                 title="Delete"
-                disabled={isSaving}
+                disabled={isSaving || isDeleting}
               >
                 <FaTrash />
               </button>

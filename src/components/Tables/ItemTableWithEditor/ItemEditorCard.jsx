@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FaSave, FaTimes, FaEdit, FaArrowLeft, FaTrash, FaSpinner } from 'react-icons/fa';
 import Select from 'react-select';
 
-import { getItemRecipes, patchRecipe } from '../../../api/recipeApi';
+import { getItemRecipes, patchRecipe, postRecipe, deleteRecipe } from '../../../api/recipeApi';
 import RecipeRow from '../../Tables/RecipeRow';
 
 import './ItemEditorCard.css';
@@ -32,6 +32,9 @@ function ItemEditorCard({
 
   const [recipes, setRecipes] = useState([]);
   const [savingRecipeIds, setSavingRecipeIds] = useState([]);
+  const [newRecipe, setNewRecipe] = useState(null);
+  const [deletingRecipeIds, setDeletingRecipeIds] = useState([]);
+  const [editingRecipeId, setEditingRecipeId] = useState(null);
 
   useEffect(() => {
     setEditedItem(item);
@@ -146,11 +149,57 @@ function ItemEditorCard({
     }
   };
 
-  const handleDeleteRecipe = (recipeToDelete) => {
-    if (window.confirm('Delete this recipe?')) {
+  const blankRecipe = {
+    recipe_id: -1, // temporary ID for React key
+    produced_item_id: item.item_id,
+    ingredient1_id: null,
+    ingredient2_id: null,
+    ingredient3_id: null,
+    production_time: 1,
+    cooking_description: '',
+  };
+
+  const handleAddRecipe = () => {
+    setNewRecipe({ ...blankRecipe });
+  };
+
+  const handleCreateRecipe = async (newRecipeData) => {
+    const tempId = 'new';
+
+    setSavingRecipeIds((prev) => [...prev, tempId]);
+
+    try {
+      const created = await postRecipe(newRecipeData);
+      setRecipes((prev) => [...prev, created]);
+    } catch (error) {
+      console.error('Failed to create recipe:', error);
+      window.alert('Error creating recipe.');
+    } finally {
+      setSavingRecipeIds((prev) => prev.filter((id) => id !== tempId));
+      setNewRecipe(null); // clear the temporary editing row
+    }
+  };
+
+  const handleCancelCreate = () => {
+    setNewRecipe(null);
+    setEditingRecipeId(null);
+  };
+
+  const handleDeleteRecipe = async (recipeToDelete) => {
+    const confirmed = window.confirm('Delete this recipe?');
+    if (!confirmed) return;
+
+    setDeletingRecipeIds((prev) => [...prev, recipeToDelete.recipe_id]);
+
+    try {
+      await deleteRecipe(recipeToDelete.recipe_id);
       setRecipes((prev) => prev.filter((r) => r.recipe_id !== recipeToDelete.recipe_id));
-      // TODO: Optionally call API here to delete
       console.log('Deleted recipe:', recipeToDelete);
+    } catch (error) {
+      console.error('Failed to delete recipe:', error);
+      window.alert('Failed to delete the recipe.');
+    } finally {
+      setDeletingRecipeIds((prev) => prev.filter((id) => id !== recipeToDelete.recipe_id));
     }
   };
 
@@ -473,9 +522,27 @@ function ItemEditorCard({
                           onSave={handleSaveRecipe}
                           onDelete={handleDeleteRecipe}
                           isSaving={savingRecipeIds.includes(recipe.recipe_id)}
+                          isDeleting={deletingRecipeIds.includes(recipe.recipe_id)}
+                          isEditing={editingRecipeId === recipe.recipe_id}
+                          setEditingRecipeId={setEditingRecipeId}
                         />
                       );
                     })}
+
+                    {newRecipe && (
+                      <RecipeRow
+                        recipe={newRecipe}
+                        ingredients={[]}
+                        allItems={Object.values(allItemsById)}
+                        onIngredientClick={(id) => onOpenItem?.(id)}
+                        onSave={handleCreateRecipe}
+                        onDelete={handleCancelCreate}
+                        isSaving={savingRecipeIds.includes('new')}
+                        isEditing={editingRecipeId === -1}
+                        setEditingRecipeId={setEditingRecipeId}
+                        forceEditing={true}
+                      />
+                    )}
                   </tbody>
                 </table>
               </>
@@ -520,9 +587,16 @@ function ItemEditorCard({
               </button>
             </>
           ) : (
-            <button className="edit-button" onClick={() => setIsEditing(true)}>
-              <FaEdit /> Edit
-            </button>
+            <>
+              {!editingRecipeId && (
+                <button className="add-recipe-button" onClick={handleAddRecipe}>
+                  + Add Recipe
+                </button>
+              )}
+              <button className="edit-button" onClick={() => setIsEditing(true)}>
+                <FaEdit /> Edit
+              </button>
+            </>
           )}
         </div>
         {isEditing && showImagePopup && (

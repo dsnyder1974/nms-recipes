@@ -252,7 +252,8 @@
 .edit-button,
 .delete-button,
 .add-row-button,
-.back-button {
+.back-button,
+.add-recipe-button {
   padding: 8px 14px;
   font-size: 0.95rem;
   border-radius: 6px;
@@ -321,6 +322,15 @@
 
 .back-button:hover {
   background-color: #d0d0d0;
+}
+
+.add-recipe-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.add-recipe-button:hover {
+  background-color: #0056b3;
 }
 
 .inline-display {
