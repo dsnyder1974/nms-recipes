@@ -493,7 +493,7 @@ function ItemEditorCard({
               <div style={{ paddingTop: '0.5rem', paddingLeft: '2px' }}>
                 <FaSpinner className="spinner" title="Loading recipes..." />
               </div>
-            ) : recipes.length > 0 ? (
+            ) : recipes.length > 0 || newRecipe ? (
               <>
                 <div className="buff-label produce-label">
                   <strong>Produce by:</strong>
