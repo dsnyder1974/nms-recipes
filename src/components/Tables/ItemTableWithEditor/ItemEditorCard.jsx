@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FaSave, FaTimes, FaEdit, FaArrowLeft, FaTrash, FaSpinner } from 'react-icons/fa';
 import Select from 'react-select';
 
+import { getIngredientsForItem } from '../../../api/itemApi';
 import { getItemRecipes, patchRecipe, postRecipe, deleteRecipe } from '../../../api/recipeApi';
 import RecipeRow from '../../Tables/RecipeRow';
 
@@ -36,6 +37,9 @@ function ItemEditorCard({
   const [deletingRecipeIds, setDeletingRecipeIds] = useState([]);
   const [editingRecipeId, setEditingRecipeId] = useState(null);
 
+  const [ingredients, setIngredients] = useState([]);
+  const [isLoadingIngredients, setIsLoadingIngredients] = useState(false);
+
   useEffect(() => {
     setEditedItem(item);
     setIsEditing(false);
@@ -45,13 +49,28 @@ function ItemEditorCard({
   }, [item]);
 
   useEffect(() => {
-    const loadRecipes = async () => {
+    const loadRecipesAndIngredients = async () => {
       setIsLoadingRecipes(true);
       try {
         console.log('Fetching recipes for item:', item.item_id);
-        const data = await getItemRecipes(item.item_id);
-        console.log('Fetched recipes:', data);
-        setRecipes(data);
+        const fetchedRecipes = await getItemRecipes(item.item_id);
+        console.log('Fetched recipes:', fetchedRecipes);
+        setRecipes(fetchedRecipes);
+
+        // ✅ Fetch ingredients only if there's at least one recipe
+        if (fetchedRecipes.length > 0) {
+          setIsLoadingIngredients(true);
+          try {
+            const data = await getIngredientsForItem(item.item_id);
+            setIngredients(data);
+          } catch (err) {
+            console.error('Failed to fetch ingredients:', err);
+          } finally {
+            setIsLoadingIngredients(false);
+          }
+        } else {
+          setIngredients([]); // clear ingredients if no recipes
+        }
       } catch (err) {
         console.error('Failed to fetch recipes:', err);
       } finally {
@@ -60,7 +79,7 @@ function ItemEditorCard({
     };
 
     if (item?.item_id) {
-      loadRecipes();
+      loadRecipesAndIngredients();
     }
   }, [item]);
 
@@ -545,6 +564,24 @@ function ItemEditorCard({
                     )}
                   </tbody>
                 </table>
+                {!isEditing && ingredients.length > 0 && (
+                  <div className="ingredients-section">
+                    <div className="buff-label" style={{ marginTop: '1rem' }}>
+                      <strong>Total Ingredients Required:</strong>
+                    </div>
+                    {isLoadingIngredients ? (
+                      <FaSpinner className="spinner" title="Loading ingredients..." />
+                    ) : (
+                      <ul className="ingredient-list">
+                        {ingredients.map((ing) => (
+                          <li key={ing.ingredient_item_id}>
+                            {ing.ingredient_name} × {ing.total_quantity}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </>
             ) : null}
           </div>
