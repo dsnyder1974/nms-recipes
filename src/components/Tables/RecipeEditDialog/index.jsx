@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
+import { FaSave, FaTimes } from 'react-icons/fa';
 import Select from 'react-select';
 import './RecipeEditDialog.css';
 
 function RecipeEditDialog({ recipe, allItems, onSave, onCancel }) {
   const [editedRecipe, setEditedRecipe] = useState(recipe);
   const dialogRef = useRef(null);
+
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setEditedRecipe(recipe);
@@ -36,8 +39,17 @@ function RecipeEditDialog({ recipe, allItems, onSave, onCancel }) {
     setEditedRecipe((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveClick = () => {
-    onSave(editedRecipe);
+  const handleSaveClick = async () => {
+    setSaving(true);
+    try {
+      await onSave(editedRecipe);
+      // Optionally close dialog here if it’s the dialog’s job
+    } catch (err) {
+      console.error('Save failed', err);
+      // Optionally show error UI
+    } finally {
+      setSaving(false);
+    }
   };
 
   const renderIngredientSelect = (field, nullable = false) => {
@@ -111,8 +123,12 @@ function RecipeEditDialog({ recipe, allItems, onSave, onCancel }) {
         </div>
 
         <div className="dialog-buttons">
-          <button onClick={handleSaveClick}>Save</button>
-          <button onClick={onCancel} className="cancel-button">
+          <button onClick={handleSaveClick} disabled={saving} className="save-button">
+            <FaSave />
+            {saving ? 'Saving...' : 'Save'}
+          </button>
+          <button onClick={onCancel} disabled={saving} className="cancel-button">
+            <FaTimes />
             Cancel
           </button>
         </div>
