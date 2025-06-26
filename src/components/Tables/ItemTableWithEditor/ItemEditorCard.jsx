@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { FaSave, FaTimes, FaEdit, FaArrowLeft, FaTrash, FaSpinner } from 'react-icons/fa';
 import Select from 'react-select';
 
-import { getIngredientsForItem } from '../../../api/itemApi';
+import { getIngredientsForItem, setPreferredRecipeForItem } from '../../../api/itemApi';
 import { getItemRecipes, patchRecipe, postRecipe, deleteRecipe } from '../../../api/recipeApi';
 import RecipeRow from '../../Tables/RecipeRow';
+import RecipeEditDialog from '../RecipeEditDialog';
 
 import './ItemEditorCard.css';
 
@@ -19,6 +20,7 @@ function ItemEditorCard({
   onDelete,
   onOpenItem,
   onBack,
+  onRefresh,
 }) {
   const [editedItem, setEditedItem] = useState(item);
   const [isEditing, setIsEditing] = useState(false);
@@ -32,10 +34,14 @@ function ItemEditorCard({
   const [isLoadingRecipes, setIsLoadingRecipes] = useState(false);
 
   const [recipes, setRecipes] = useState([]);
-  const [savingRecipeIds, setSavingRecipeIds] = useState([]);
-  const [newRecipe, setNewRecipe] = useState(null);
+
+  const [isEditingRecipe, setIsEditingRecipe] = useState(false);
+  const [activeRecipe, setActiveRecipe] = useState(null);
+
   const [deletingRecipeIds, setDeletingRecipeIds] = useState([]);
-  const [editingRecipeId, setEditingRecipeId] = useState(null);
+
+  const [preferredRecipeId, setPreferredRecipeId] = useState(null);
+  const needsRefreshOnCloseRef = useRef(false);
 
   const [ingredients, setIngredients] = useState([]);
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(false);
@@ -46,6 +52,7 @@ function ItemEditorCard({
     setIsDirty(false);
     setIsSaving(false);
     setImageError(false);
+    setPreferredRecipeId(item.preferred_recipe_id || null);
   }, [item]);
 
   useEffect(() => {
@@ -57,7 +64,7 @@ function ItemEditorCard({
         console.log('Fetched recipes:', fetchedRecipes);
         setRecipes(fetchedRecipes);
 
-        // ✅ Fetch ingredients only if there's at least one recipe
+        // Fetch ingredients only if there's at least one recipe
         if (fetchedRecipes.length > 0) {
           setIsLoadingIngredients(true);
           try {
@@ -96,8 +103,14 @@ function ItemEditorCard({
     return true;
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    console.log('Closing editor, isEditing:', isEditing, 'isDirty:', isDirty);
     if (!isEditing || confirmDiscardChanges()) {
+      console.log('Closing editor, needsRefreshOnClose:', needsRefreshOnCloseRef.current);
+      if (needsRefreshOnCloseRef.current) {
+        console.log('Refreshing data on close due to changes');
+        await onRefresh?.();
+      }
       setIsEditing(false);
       setIsDirty(false);
       setEditedItem(item);
@@ -105,8 +118,12 @@ function ItemEditorCard({
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (!isDirty || confirmDiscardChanges()) {
+      if (needsRefreshOnCloseRef.current) {
+        console.log('Refreshing data on cancel due to changes');
+        await onRefresh?.();
+      }
       setEditedItem(item);
       setIsEditing(false);
       setIsDirty(false);
@@ -115,10 +132,17 @@ function ItemEditorCard({
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target)) {
+      const clickedInsideModal = modalRef.current?.contains(e.target);
+      const clickedInsideReactSelect = e.target.closest('[class^="react-select__"]');
+
+      console.log('Clicked inside modal:', !!clickedInsideModal);
+      console.log('Clicked inside React Select:', !!clickedInsideReactSelect);
+
+      if (!clickedInsideModal && !clickedInsideReactSelect) {
         handleClose();
       }
     };
+
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
         if (showImagePopup) return;
@@ -152,56 +176,52 @@ function ItemEditorCard({
     }
   };
 
-  const handleSaveRecipe = async (updatedRecipe) => {
-    setSavingRecipeIds((prev) => [...prev, updatedRecipe.recipe_id]);
+  const handleEditRecipe = (recipeToEdit) => {
+    console.log('Editing recipe:', recipeToEdit);
+    setActiveRecipe(recipeToEdit);
+    setIsEditingRecipe(true);
+  };
+
+  const handleRecipeSave = async (updatedRecipe) => {
     try {
-      const savedRecipe = await patchRecipe(updatedRecipe);
-      setRecipes((prev) =>
-        prev.map((r) => (r.recipe_id === savedRecipe.recipe_id ? savedRecipe : r))
-      );
-      console.log('Saved recipe:', savedRecipe);
+      let savedRecipe;
+      console.log('Saving recipe:', updatedRecipe);
+
+      if (updatedRecipe.recipe_id) {
+        savedRecipe = await patchRecipe(updatedRecipe);
+        setRecipes((prev) =>
+          prev.map((r) => (r.recipe_id === savedRecipe.recipe_id ? savedRecipe : r))
+        );
+      } else {
+        savedRecipe = await postRecipe(updatedRecipe);
+        setRecipes((prev) => [...prev, savedRecipe]);
+      }
+      needsRefreshOnCloseRef.current = true;
     } catch (error) {
       console.error('Failed to save recipe:', error);
-      window.alert('An error occurred while saving the recipe.');
+      window.alert('Failed to save recipe changes.');
     } finally {
-      setSavingRecipeIds((prev) => prev.filter((id) => id !== updatedRecipe.recipe_id));
+      setIsEditingRecipe(false);
+      setActiveRecipe(null);
     }
   };
 
-  const blankRecipe = {
-    recipe_id: -1, // temporary ID for React key
-    produced_item_id: item.item_id,
-    ingredient1_id: null,
-    ingredient2_id: null,
-    ingredient3_id: null,
-    production_time: 1,
-    cooking_description: '',
+  const handleRecipeCancel = () => {
+    setIsEditingRecipe(false);
+    setActiveRecipe(null);
   };
 
   const handleAddRecipe = () => {
-    setNewRecipe({ ...blankRecipe });
-  };
-
-  const handleCreateRecipe = async (newRecipeData) => {
-    const tempId = 'new';
-
-    setSavingRecipeIds((prev) => [...prev, tempId]);
-
-    try {
-      const created = await postRecipe(newRecipeData);
-      setRecipes((prev) => [...prev, created]);
-    } catch (error) {
-      console.error('Failed to create recipe:', error);
-      window.alert('Error creating recipe.');
-    } finally {
-      setSavingRecipeIds((prev) => prev.filter((id) => id !== tempId));
-      setNewRecipe(null); // clear the temporary editing row
-    }
-  };
-
-  const handleCancelCreate = () => {
-    setNewRecipe(null);
-    setEditingRecipeId(null);
+    setActiveRecipe({
+      recipe_id: null, // indicates new recipe
+      produced_item_id: item.item_id,
+      ingredient1_id: null,
+      ingredient2_id: null,
+      ingredient3_id: null,
+      production_time: '',
+      cooking_description: '',
+    });
+    setIsEditingRecipe(true);
   };
 
   const handleDeleteRecipe = async (recipeToDelete) => {
@@ -219,6 +239,25 @@ function ItemEditorCard({
       window.alert('Failed to delete the recipe.');
     } finally {
       setDeletingRecipeIds((prev) => prev.filter((id) => id !== recipeToDelete.recipe_id));
+    }
+  };
+
+  const handleTogglePreferred = async (recipe) => {
+    const newPreferredId = recipe.recipe_id === preferredRecipeId ? null : recipe.recipe_id;
+    await setPreferredRecipeForItem(item.item_id, newPreferredId);
+
+    setPreferredRecipeId(newPreferredId);
+    needsRefreshOnCloseRef.current = true;
+
+    // Re-fetch ingredients for the new preferred recipe
+    setIsLoadingIngredients(true);
+    try {
+      const updatedIngredients = await getIngredientsForItem(item.item_id);
+      setIngredients(updatedIngredients);
+    } catch (err) {
+      console.error('Failed to re-fetch ingredients after updating preferred recipe:', err);
+    } finally {
+      setIsLoadingIngredients(false);
     }
   };
 
@@ -512,7 +551,7 @@ function ItemEditorCard({
               <div style={{ paddingTop: '0.5rem', paddingLeft: '2px' }}>
                 <FaSpinner className="spinner" title="Loading recipes..." />
               </div>
-            ) : recipes.length > 0 || newRecipe ? (
+            ) : recipes.length > 0 ? (
               <>
                 <div className="buff-label produce-label">
                   <strong>Produce by:</strong>
@@ -538,30 +577,14 @@ function ItemEditorCard({
                           ingredients={ingredients}
                           allItems={Object.values(allItemsById)}
                           onIngredientClick={(ingredientId) => onOpenItem?.(ingredientId)}
-                          onSave={handleSaveRecipe}
+                          onEdit={handleEditRecipe}
                           onDelete={handleDeleteRecipe}
-                          isSaving={savingRecipeIds.includes(recipe.recipe_id)}
                           isDeleting={deletingRecipeIds.includes(recipe.recipe_id)}
-                          isEditing={editingRecipeId === recipe.recipe_id}
-                          setEditingRecipeId={setEditingRecipeId}
+                          isPreferred={recipe.recipe_id === preferredRecipeId}
+                          onTogglePreferred={handleTogglePreferred}
                         />
                       );
                     })}
-
-                    {newRecipe && (
-                      <RecipeRow
-                        recipe={newRecipe}
-                        ingredients={[]}
-                        allItems={Object.values(allItemsById)}
-                        onIngredientClick={(id) => onOpenItem?.(id)}
-                        onSave={handleCreateRecipe}
-                        onDelete={handleCancelCreate}
-                        isSaving={savingRecipeIds.includes('new')}
-                        isEditing={editingRecipeId === -1}
-                        setEditingRecipeId={setEditingRecipeId}
-                        forceEditing={true}
-                      />
-                    )}
                   </tbody>
                 </table>
                 {!isEditing && ingredients.length > 0 && (
@@ -625,11 +648,9 @@ function ItemEditorCard({
             </>
           ) : (
             <>
-              {!editingRecipeId && (
-                <button className="add-recipe-button" onClick={handleAddRecipe}>
-                  + Add Recipe
-                </button>
-              )}
+              <button className="add-recipe-button" onClick={handleAddRecipe}>
+                + Add Recipe
+              </button>
               <button className="edit-button" onClick={() => setIsEditing(true)}>
                 <FaEdit /> Edit
               </button>
@@ -664,6 +685,14 @@ function ItemEditorCard({
               autoFocus
             />
           </div>
+        )}
+        {isEditingRecipe && activeRecipe && (
+          <RecipeEditDialog
+            recipe={activeRecipe}
+            allItems={Object.values(allItemsById)}
+            onSave={handleRecipeSave}
+            onCancel={handleRecipeCancel}
+          />
         )}
       </div>
     </div>

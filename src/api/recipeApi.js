@@ -36,6 +36,7 @@ export async function patchRecipe(updatedRecipe) {
 }
 
 export async function postRecipe(newRecipe) {
+  console.log('Posting new recipe:', newRecipe);
   const response = await fetch(
     `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgRecipe`,
     {

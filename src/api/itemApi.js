@@ -100,3 +100,23 @@ export async function getIngredientsForItem(item_id) {
 
   return await response.json();
 }
+
+export async function setPreferredRecipeForItem(item_id, recipe_id) {
+  console.log(`Setting preferred recipe ${recipe_id} for item ${item_id}`);
+  const response = await fetch(
+    `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgSetPreferredRecipeForItem/${item_id}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ preferred_recipe_id: recipe_id }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to set preferred recipe for item ${item_id}`);
+  }
+
+  return await response.json();
+}

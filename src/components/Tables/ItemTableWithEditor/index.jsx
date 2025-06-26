@@ -143,7 +143,6 @@ function ItemTableWithEditor({
         prev.map((item) => (getId(item) === getId(refreshItem) ? refreshItem : item))
       );
       toast.success(`${title} updated!`);
-      // setEditingItem(null);
     } catch (err) {
       console.error('Failed to update item:', err);
       toast.error(`Failed to update ${title.toLowerCase()}`);
@@ -202,6 +201,24 @@ function ItemTableWithEditor({
 
   const handleRowClick = (item) => {
     setEditingItem(item);
+  };
+
+  const refreshItem = async (itemId) => {
+    try {
+      const updatedItem = await getItemWithCategories(itemId);
+      setItems((prev) =>
+        prev.map((item) => (item.item_id === updatedItem.item_id ? updatedItem : item))
+      );
+      setAllItemsById((prev) => ({
+        ...prev,
+        [updatedItem.item_id]: updatedItem,
+      }));
+      return updatedItem;
+    } catch (err) {
+      console.error('Failed to refresh item:', err);
+      toast.error('Failed to refresh item after update');
+      return null;
+    }
   };
 
   const getBuffName = (id) => buffs.find((b) => b.buff_id === id)?.name ?? 'No buff';
@@ -380,6 +397,7 @@ function ItemTableWithEditor({
               onDelete={handleDelete}
               onOpenItem={handleOpenItem}
               onBack={itemStack.length > 0 ? handleBack : null}
+              onRefresh={() => refreshItem(editingItem.item_id)}
             />
           )}
           {isAdding && (

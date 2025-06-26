@@ -23,9 +23,10 @@
 .recipe-actions-aligner {
   display: flex;
   flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .recipe-button-margin {
