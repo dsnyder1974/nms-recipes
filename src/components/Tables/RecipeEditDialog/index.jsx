@@ -3,7 +3,7 @@ import { FaSave, FaTimes } from 'react-icons/fa';
 import Select from 'react-select';
 import './RecipeEditDialog.css';
 
-function RecipeEditDialog({ recipe, allItems, onSave, onCancel }) {
+function RecipeEditDialog({ recipe, itemNamesById, onSave, onCancel }) {
   const [editedRecipe, setEditedRecipe] = useState(recipe);
   const dialogRef = useRef(null);
 
@@ -53,9 +53,9 @@ function RecipeEditDialog({ recipe, allItems, onSave, onCancel }) {
   };
 
   const renderIngredientSelect = (field, nullable = false) => {
-    const baseOptions = allItems.map((item) => ({
-      value: item.item_id,
-      label: item.name,
+    const baseOptions = Object.entries(itemNamesById).map(([id, name]) => ({
+      value: parseInt(id, 10),
+      label: name,
     }));
     const options = nullable ? [{ value: null, label: '-- None --' }, ...baseOptions] : baseOptions;
 

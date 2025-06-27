@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaEdit, FaTrash, FaSpinner, FaStar, FaRegStar } from 'react-icons/fa';
 import './RecipeRow.css';
 
@@ -12,6 +12,19 @@ function RecipeRow({
   isPreferred,
   onTogglePreferred,
 }) {
+  const [savingPreferred, setSavingPreferred] = useState(false);
+
+  const handleTogglePreferred = async (recipe) => {
+    setSavingPreferred(true);
+    try {
+      await onTogglePreferred(recipe);
+    } catch (error) {
+      console.error('Failed to toggle preferred state', error);
+    } finally {
+      setSavingPreferred(false);
+    }
+  };
+
   const ingredientText = ingredients.map((ing, index) => (
     <React.Fragment key={ing.id}>
       <span
@@ -46,14 +59,20 @@ function RecipeRow({
             </span>
           ) : (
             <>
-              <button
-                onClick={() => onTogglePreferred(recipe)}
-                className="icon-button icon-button-star"
-                title={isPreferred ? 'Unmark as Preferred' : 'Mark as Preferred'}
-                disabled={isDeleting}
-              >
-                {isPreferred ? <FaStar /> : <FaRegStar />}
-              </button>
+              {savingPreferred ? (
+                <span className="saving-indicator">
+                  <FaSpinner className="spinner" />
+                </span>
+              ) : (
+                <button
+                  onClick={() => handleTogglePreferred(recipe)}
+                  className="icon-button icon-button-star"
+                  title={isPreferred ? 'Unmark as Preferred' : 'Mark as Preferred'}
+                  disabled={isDeleting}
+                >
+                  {isPreferred ? <FaStar /> : <FaRegStar />}
+                </button>
+              )}
               <button
                 className="icon-button icon-button-edit"
                 title="Edit"

@@ -23,7 +23,7 @@ function ItemTableWithEditor({
   title,
 }) {
   const [items, setItems] = useState([]);
-  const [allItemsById, setAllItemsById] = useState({});
+  const [itemNamesById, setItemNamesById] = useState({});
   const [sortField, setSortField] = useState(columns[0]?.field || '');
   const [sortDirection, setSortDirection] = useState('asc');
   const [isLoading, setIsLoading] = useState(true);
@@ -58,7 +58,9 @@ function ItemTableWithEditor({
         }));
 
         setItems(enrichedItems);
-        setAllItemsById(Object.fromEntries(enrichedItems.map((item) => [item.item_id, item])));
+        setItemNamesById(
+          Object.fromEntries(enrichedItems.map((item) => [item.item_id, item.name]))
+        );
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error(`Failed to fetch ${title.toLowerCase()}`);
@@ -137,7 +139,7 @@ function ItemTableWithEditor({
         await patchCategoriesByItem(updatedItem);
       }
       const refreshItem = await getItemWithCategories(saved.item_id);
-      console.log('Refreshed item:', refreshItem);
+      // console.log('Refreshed item:', refreshItem);
 
       setItems((prev) =>
         prev.map((item) => (getId(item) === getId(refreshItem) ? refreshItem : item))
@@ -160,6 +162,11 @@ function ItemTableWithEditor({
       }
       const addedItem = await getItemWithCategories(added.item_id);
       setItems((prev) => [...prev, addedItem]);
+      setItemNamesById((prev) => ({
+        ...prev,
+        [addedItem.item_id]: addedItem.name,
+      }));
+
       toast.success(`${title} added!`);
       setIsAdding(false);
     } catch (err) {
@@ -203,22 +210,12 @@ function ItemTableWithEditor({
     setEditingItem(item);
   };
 
-  const refreshItem = async (itemId) => {
-    try {
-      const updatedItem = await getItemWithCategories(itemId);
-      setItems((prev) =>
-        prev.map((item) => (item.item_id === updatedItem.item_id ? updatedItem : item))
-      );
-      setAllItemsById((prev) => ({
-        ...prev,
-        [updatedItem.item_id]: updatedItem,
-      }));
-      return updatedItem;
-    } catch (err) {
-      console.error('Failed to refresh item:', err);
-      toast.error('Failed to refresh item after update');
-      return null;
-    }
+  const handlePreferredRecipeChange = (itemId, recipeId) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.item_id === itemId ? { ...item, preferred_recipe_id: recipeId } : item
+      )
+    );
   };
 
   const getBuffName = (id) => buffs.find((b) => b.buff_id === id)?.name ?? 'No buff';
@@ -385,7 +382,7 @@ function ItemTableWithEditor({
           {editingItem && (
             <ItemEditorCard
               item={editingItem}
-              allItemsById={allItemsById}
+              itemNamesById={itemNamesById}
               columns={editorColumns}
               buffs={buffs}
               allCategories={allCategories}
@@ -397,7 +394,7 @@ function ItemTableWithEditor({
               onDelete={handleDelete}
               onOpenItem={handleOpenItem}
               onBack={itemStack.length > 0 ? handleBack : null}
-              onRefresh={() => refreshItem(editingItem.item_id)}
+              onPreferredRecipeChange={handlePreferredRecipeChange}
             />
           )}
           {isAdding && (

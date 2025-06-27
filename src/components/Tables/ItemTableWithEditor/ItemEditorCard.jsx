@@ -11,7 +11,7 @@ import './ItemEditorCard.css';
 
 function ItemEditorCard({
   item,
-  allItemsById,
+  itemNamesById,
   columns,
   buffs,
   allCategories,
@@ -20,7 +20,7 @@ function ItemEditorCard({
   onDelete,
   onOpenItem,
   onBack,
-  onRefresh,
+  onPreferredRecipeChange,
 }) {
   const [editedItem, setEditedItem] = useState(item);
   const [isEditing, setIsEditing] = useState(false);
@@ -41,7 +41,6 @@ function ItemEditorCard({
   const [deletingRecipeIds, setDeletingRecipeIds] = useState([]);
 
   const [preferredRecipeId, setPreferredRecipeId] = useState(null);
-  const needsRefreshOnCloseRef = useRef(false);
 
   const [ingredients, setIngredients] = useState([]);
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(false);
@@ -59,9 +58,9 @@ function ItemEditorCard({
     const loadRecipesAndIngredients = async () => {
       setIsLoadingRecipes(true);
       try {
-        console.log('Fetching recipes for item:', item.item_id);
+        // console.log('Fetching recipes for item:', item.item_id);
         const fetchedRecipes = await getItemRecipes(item.item_id);
-        console.log('Fetched recipes:', fetchedRecipes);
+        // console.log('Fetched recipes:', fetchedRecipes);
         setRecipes(fetchedRecipes);
 
         // Fetch ingredients only if there's at least one recipe
@@ -104,13 +103,8 @@ function ItemEditorCard({
   };
 
   const handleClose = async () => {
-    console.log('Closing editor, isEditing:', isEditing, 'isDirty:', isDirty);
+    // console.log('Closing editor, isEditing:', isEditing, 'isDirty:', isDirty);
     if (!isEditing || confirmDiscardChanges()) {
-      console.log('Closing editor, needsRefreshOnClose:', needsRefreshOnCloseRef.current);
-      if (needsRefreshOnCloseRef.current) {
-        console.log('Refreshing data on close due to changes');
-        await onRefresh?.();
-      }
       setIsEditing(false);
       setIsDirty(false);
       setEditedItem(item);
@@ -120,10 +114,6 @@ function ItemEditorCard({
 
   const handleCancel = async () => {
     if (!isDirty || confirmDiscardChanges()) {
-      if (needsRefreshOnCloseRef.current) {
-        console.log('Refreshing data on cancel due to changes');
-        await onRefresh?.();
-      }
       setEditedItem(item);
       setIsEditing(false);
       setIsDirty(false);
@@ -135,8 +125,8 @@ function ItemEditorCard({
       const clickedInsideModal = modalRef.current?.contains(e.target);
       const clickedInsideReactSelect = e.target.closest('[class^="react-select__"]');
 
-      console.log('Clicked inside modal:', !!clickedInsideModal);
-      console.log('Clicked inside React Select:', !!clickedInsideReactSelect);
+      // console.log('Clicked inside modal:', !!clickedInsideModal);
+      // console.log('Clicked inside React Select:', !!clickedInsideReactSelect);
 
       if (!clickedInsideModal && !clickedInsideReactSelect) {
         handleClose();
@@ -177,7 +167,7 @@ function ItemEditorCard({
   };
 
   const handleEditRecipe = (recipeToEdit) => {
-    console.log('Editing recipe:', recipeToEdit);
+    // console.log('Editing recipe:', recipeToEdit);
     setActiveRecipe(recipeToEdit);
     setIsEditingRecipe(true);
   };
@@ -185,7 +175,7 @@ function ItemEditorCard({
   const handleRecipeSave = async (updatedRecipe) => {
     try {
       let savedRecipe;
-      console.log('Saving recipe:', updatedRecipe);
+      // console.log('Saving recipe:', updatedRecipe);
 
       if (updatedRecipe.recipe_id) {
         savedRecipe = await patchRecipe(updatedRecipe);
@@ -196,7 +186,6 @@ function ItemEditorCard({
         savedRecipe = await postRecipe(updatedRecipe);
         setRecipes((prev) => [...prev, savedRecipe]);
       }
-      needsRefreshOnCloseRef.current = true;
     } catch (error) {
       console.error('Failed to save recipe:', error);
       window.alert('Failed to save recipe changes.');
@@ -233,7 +222,7 @@ function ItemEditorCard({
     try {
       await deleteRecipe(recipeToDelete.recipe_id);
       setRecipes((prev) => prev.filter((r) => r.recipe_id !== recipeToDelete.recipe_id));
-      console.log('Deleted recipe:', recipeToDelete);
+      // console.log('Deleted recipe:', recipeToDelete);
     } catch (error) {
       console.error('Failed to delete recipe:', error);
       window.alert('Failed to delete the recipe.');
@@ -246,8 +235,9 @@ function ItemEditorCard({
     const newPreferredId = recipe.recipe_id === preferredRecipeId ? null : recipe.recipe_id;
     await setPreferredRecipeForItem(item.item_id, newPreferredId);
 
+    // console.log('Setting preferred recipe for item:', item.item_id, 'to', newPreferredId);
     setPreferredRecipeId(newPreferredId);
-    needsRefreshOnCloseRef.current = true;
+    onPreferredRecipeChange?.(item.item_id, newPreferredId);
 
     // Re-fetch ingredients for the new preferred recipe
     setIsLoadingIngredients(true);
@@ -567,7 +557,7 @@ function ItemEditorCard({
 
                       const ingredients = ingredientIds.map((id) => ({
                         id,
-                        name: allItemsById?.[id]?.name || `Item ${id}`,
+                        name: itemNamesById?.[id] || `Item ${id}`,
                       }));
 
                       return (
@@ -575,7 +565,6 @@ function ItemEditorCard({
                           key={recipe.recipe_id}
                           recipe={recipe}
                           ingredients={ingredients}
-                          allItems={Object.values(allItemsById)}
                           onIngredientClick={(ingredientId) => onOpenItem?.(ingredientId)}
                           onEdit={handleEditRecipe}
                           onDelete={handleDeleteRecipe}
@@ -689,7 +678,7 @@ function ItemEditorCard({
         {isEditingRecipe && activeRecipe && (
           <RecipeEditDialog
             recipe={activeRecipe}
-            allItems={Object.values(allItemsById)}
+            itemNamesById={itemNamesById}
             onSave={handleRecipeSave}
             onCancel={handleRecipeCancel}
           />

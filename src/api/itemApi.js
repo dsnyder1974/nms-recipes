@@ -102,7 +102,6 @@ export async function getIngredientsForItem(item_id) {
 }
 
 export async function setPreferredRecipeForItem(item_id, recipe_id) {
-  console.log(`Setting preferred recipe ${recipe_id} for item ${item_id}`);
   const response = await fetch(
     `https://7selh9jd9i.execute-api.us-east-2.amazonaws.com/dev/pgSetPreferredRecipeForItem/${item_id}`,
     {
