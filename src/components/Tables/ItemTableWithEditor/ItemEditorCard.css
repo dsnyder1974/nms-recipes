@@ -113,8 +113,18 @@
   margin-top: 12px;
 }
 
+/* Always stack buff inputs vertically in edit mode */
+.editor-modal.editing .buff-info {
+  flex-direction: column;
+}
+
 .buff-input {
   flex: 1;
+}
+
+.editor-modal.editing .buff-input,
+.editor-modal.editing .buff-select {
+  width: 100%;
 }
 
 .buff-select__control {
@@ -139,9 +149,9 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  min-width: 80px;
-  max-width: 80px;
-  flex-shrink: 0;
+  width: 100%;
+  max-width: 96px;
+  box-sizing: border-box;
 }
 
 .image-placeholder {
@@ -251,7 +261,6 @@
 .cancel-button,
 .edit-button,
 .delete-button,
-.add-row-button,
 .back-button,
 .add-recipe-button {
   padding: 8px 14px;
@@ -295,16 +304,6 @@
 
 .delete-button:hover {
   background-color: #a71d2a;
-}
-
-.add-row-button {
-  background-color: #007bff;
-  color: white;
-  margin-top: 12px;
-}
-
-.add-row-button:hover {
-  background-color: #0056b3;
 }
 
 .edit-button {
@@ -354,5 +353,79 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 600px) {
+  .editor-modal.editing .editor-card-layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .editor-modal.editing .editor-main,
+  .editor-modal.editing .editor-side {
+    width: 100%;
+  }
+
+  .editor-modal.editing .editor-side {
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .editor-modal.editing .editor-side > * {
+    flex: 1 1 100%;
+  }
+
+  .editor-modal.editing .image-preview,
+  .editor-modal.editing .image-placeholder {
+    width: 80px;
+    height: 80px;
+    flex: 0 0 auto;
+  }
+
+  .editor-modal.editing .item-value input,
+  .editor-modal.editing .buff-input input,
+  .editor-modal.editing .buff-select,
+  .editor-modal.editing .full-width,
+  .editor-modal.editing textarea {
+    width: 100% !important;
+  }
+
+  .editor-modal.editing .buff-info {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .editor-modal.editing {
+    padding: 0 16px 16px;
+    width: 95%;
+    max-width: 95%;
+  }
+
+  .editor-modal.editing .editor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .editor-modal.editing .editor-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .editor-modal.editing .editor-actions > button {
+    flex: 1 1 45%;
+    justify-content: center;
+  }
+
+  .editor-modal.editing .image-url-popup {
+    padding: 8px 12px;
+  }
+
+  .editor-modal.editing .image-url-input {
+    width: 100%;
   }
 }

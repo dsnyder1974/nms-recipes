@@ -132,6 +132,25 @@
   padding: 0 8px 0 0;
 }
 
+.add-row-button {
+  background-color: #007bff;
+  color: white;
+  margin-top: 12px;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.add-row-button:hover {
+  background-color: #0056b3;
+}
+
 .cell-flex {
   display: flex;
   flex-direction: column;

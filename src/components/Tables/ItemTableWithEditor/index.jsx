@@ -10,7 +10,7 @@ import { fetchItemsCategories, patchCategoriesByItem } from '../../../api/itemCa
 
 import Select from 'react-select/creatable';
 
-import './DataTable.css';
+import './ItemTableWithEditor.css';
 
 function ItemTableWithEditor({
   columns, // columns to display in the table
