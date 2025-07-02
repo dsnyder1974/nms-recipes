@@ -87,7 +87,7 @@ function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
 
   return (
     <div className="editor-modal-overlay">
-      <div className="editor-modal" ref={modalRef}>
+      <div className="editor-modal editing" ref={modalRef}>
         <button className="close-button" onClick={onCancel}>
           &times;
         </button>
@@ -172,75 +172,6 @@ function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
                 }}
               />
             </div>
-
-            <div className="buff-info">
-              {buffFields.map((col) => (
-                <div key={col.field} className="buff-input">
-                  <label className="field-label" htmlFor={col.field}>
-                    {col.label}
-                  </label>
-                  {col.required && <span className="required-hint">Required</span>}
-                  {col.field === 'buff_id' ? (
-                    <Select
-                      inputId={col.field}
-                      className="buff-select"
-                      classNamePrefix="buff"
-                      placeholder="Select Buff"
-                      value={buffOptions.find((opt) => opt.value === newItem.buff_id) || null}
-                      onChange={(option) => handleChange('buff_id', option?.value ?? null)}
-                      options={buffOptions}
-                      isClearable={false}
-                      menuPortalTarget={document.body}
-                      menuPosition="fixed"
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          height: '38px',
-                          minHeight: '38px',
-                          borderRadius: '4px',
-                          border: '1px solid #ccc',
-                          boxShadow: 'none',
-                        }),
-                        valueContainer: (base) => ({
-                          ...base,
-                          height: '38px',
-                          padding: '0 10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                        }),
-                        singleValue: (base) => ({
-                          ...base,
-                          lineHeight: '1',
-                          alignSelf: 'center',
-                        }),
-                        input: (base) => ({
-                          ...base,
-                          margin: '0',
-                          padding: '0',
-                        }),
-                        indicatorsContainer: (base) => ({
-                          ...base,
-                          height: '38px',
-                        }),
-                        menuPortal: (base) => ({
-                          ...base,
-                          zIndex: 9999,
-                        }),
-                      }}
-                    />
-                  ) : (
-                    <input
-                      id={col.field}
-                      className="full-width"
-                      type="text"
-                      value={newItem[col.field] || ''}
-                      onChange={(e) => handleChange(col.field, e.target.value)}
-                    />
-                  )}
-                  {col.field === 'buff_duration' && <span className="buff-suffix"> minutes</span>}
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="editor-side">
@@ -276,6 +207,75 @@ function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="buff-info">
+          {buffFields.map((col) => (
+            <div key={col.field} className="buff-input">
+              <label className="field-label" htmlFor={col.field}>
+                {col.label}
+              </label>
+              {col.required && <span className="required-hint">Required</span>}
+              {col.field === 'buff_id' ? (
+                <Select
+                  inputId={col.field}
+                  className="buff-select"
+                  classNamePrefix="buff"
+                  placeholder="Select Buff"
+                  value={buffOptions.find((opt) => opt.value === newItem.buff_id) || null}
+                  onChange={(option) => handleChange('buff_id', option?.value ?? null)}
+                  options={buffOptions}
+                  isClearable={false}
+                  menuPortalTarget={document.body}
+                  menuPosition="fixed"
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      height: '38px',
+                      minHeight: '38px',
+                      borderRadius: '4px',
+                      border: '1px solid #ccc',
+                      boxShadow: 'none',
+                    }),
+                    valueContainer: (base) => ({
+                      ...base,
+                      height: '38px',
+                      padding: '0 10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      lineHeight: '1',
+                      alignSelf: 'center',
+                    }),
+                    input: (base) => ({
+                      ...base,
+                      margin: '0',
+                      padding: '0',
+                    }),
+                    indicatorsContainer: (base) => ({
+                      ...base,
+                      height: '38px',
+                    }),
+                    menuPortal: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                  }}
+                />
+              ) : (
+                <input
+                  id={col.field}
+                  className="full-width"
+                  type="text"
+                  value={newItem[col.field] || ''}
+                  onChange={(e) => handleChange(col.field, e.target.value)}
+                />
+              )}
+              {col.field === 'buff_duration' && <span className="buff-suffix"> minutes</span>}
+            </div>
+          ))}
         </div>
 
         <div className="editor-actions">

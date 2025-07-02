@@ -357,6 +357,10 @@
 }
 
 @media (max-width: 600px) {
+  editor-modal.editing {
+    position: relative;
+  }
+
   .editor-modal.editing .editor-card-layout {
     flex-direction: column;
     gap: 16px;
@@ -427,5 +431,14 @@
 
   .editor-modal.editing .image-url-input {
     width: 100%;
+  }
+
+  .editor-modal.editing .close-button {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    padding: 0;
+    line-height: 1;
   }
 }
