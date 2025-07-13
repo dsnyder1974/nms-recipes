@@ -91,18 +91,34 @@ function ItemTableWithEditor({
     loadBuffsAndCategories();
   }, []);
 
+  const getBuffName = (id) => buffs.find((b) => b.buff_id === id)?.name ?? '- No buff -';
+
   const topItemsByBuff = useTopItemsByBuff(items, {
     topN: 3,
     sortField: 'units', // or another metric
   });
 
-  const topItemsFlat = useMemo(
-    () =>
-      Object.values(topItemsByBuff)
-        .flat()
-        .filter((item) => item), // avoid undefined
-    [topItemsByBuff]
-  );
+  const topItemsFlat = useMemo(() => {
+    const flatItems = Object.values(topItemsByBuff)
+      .flat()
+      .filter((item) => item); // avoid undefined
+
+    return [...flatItems].sort((a, b) => {
+      let aValue = sortField === 'buff_id' ? getBuffName(a.buff_id).toLowerCase() : a[sortField];
+
+      let bValue = sortField === 'buff_id' ? getBuffName(b.buff_id).toLowerCase() : b[sortField];
+
+      if (typeof aValue === 'string') {
+        aValue = aValue?.toLowerCase() ?? '';
+        bValue = bValue?.toLowerCase() ?? '';
+        return sortDirection === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      return sortDirection === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
+    });
+  }, [topItemsByBuff, sortField, sortDirection]);
 
   const handleSort = (field) => {
     if (field === sortField) {
@@ -117,8 +133,9 @@ function ItemTableWithEditor({
     if (disableSorting) return items;
 
     return [...items].sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
+      let aValue = sortField === 'buff_id' ? getBuffName(a.buff_id).toLowerCase() : a[sortField];
+
+      let bValue = sortField === 'buff_id' ? getBuffName(b.buff_id).toLowerCase() : b[sortField];
 
       if (typeof aValue === 'string') {
         aValue = aValue?.toLowerCase() ?? '';
@@ -238,8 +255,6 @@ function ItemTableWithEditor({
       )
     );
   };
-
-  const getBuffName = (id) => buffs.find((b) => b.buff_id === id)?.name ?? 'No buff';
 
   return (
     <div className="category-table-container">
