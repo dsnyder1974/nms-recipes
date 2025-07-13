@@ -1,7 +1,7 @@
 // import DataTable from '../../components/Tables/DataTable';
 import ItemTableWithEditor from '../../components/Tables/ItemTableWithEditor';
 
-import { fetchItems, postItem, patchItem, deleteItem } from '../../api/itemApi';
+import { getTopItemsByBuff, postItem, patchItem, deleteItem } from '../../api/itemApi';
 
 const columns = [
   { field: 'item_id', label: 'Item ID', editable: false, width: '80px' },
@@ -33,21 +33,21 @@ const editorColumns = [
   { field: 'value', label: 'Value', editable: true, group: 'value', unit: 'units' },
 ];
 
-const ManageItems = () => {
+const TopItemsByBuff = () => {
   return (
     <ItemTableWithEditor
       title="Items"
       columns={columns}
       editorColumns={editorColumns}
-      fetchData={fetchItems}
+      fetchData={getTopItemsByBuff}
       postItem={postItem}
       patchItem={patchItem}
       deleteItem={deleteItem}
       getId={(item) => item.item_id}
       newItemTemplate={{ name: '', description: '' }}
-      disableSorting={false}
+      disableSorting={true}
     />
   );
 };
 
-export default ManageItems;
+export default TopItemsByBuff;

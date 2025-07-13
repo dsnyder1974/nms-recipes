@@ -8,6 +8,8 @@ import { fetchBuffs } from '../../../api/buffApi';
 import { fetchCategories } from '../../../api/categoryApi';
 import { fetchItemsCategories, patchCategoriesByItem } from '../../../api/itemCategoryApi';
 
+import { useTopItemsByBuff } from '../../Hooks/useTopItemsByBuff';
+
 import Select from 'react-select/creatable';
 
 import './ItemTableWithEditor.css';
@@ -21,6 +23,7 @@ function ItemTableWithEditor({
   deleteItem,
   getId,
   title,
+  disableSorting = false,
 }) {
   const [items, setItems] = useState([]);
   const [itemNamesById, setItemNamesById] = useState({});
@@ -34,6 +37,7 @@ function ItemTableWithEditor({
   const [allCategories, setAllCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [itemStack, setItemStack] = useState([]);
+  const [showTopPerBuff, setShowTopPerBuff] = useState(false);
 
   useEffect(() => {
     const loadItems = async () => {
@@ -87,6 +91,19 @@ function ItemTableWithEditor({
     loadBuffsAndCategories();
   }, []);
 
+  const topItemsByBuff = useTopItemsByBuff(items, {
+    topN: 3,
+    sortField: 'units', // or another metric
+  });
+
+  const topItemsFlat = useMemo(
+    () =>
+      Object.values(topItemsByBuff)
+        .flat()
+        .filter((item) => item), // avoid undefined
+    [topItemsByBuff]
+  );
+
   const handleSort = (field) => {
     if (field === sortField) {
       setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
@@ -97,6 +114,8 @@ function ItemTableWithEditor({
   };
 
   const sortedItems = useMemo(() => {
+    if (disableSorting) return items;
+
     return [...items].sort((a, b) => {
       let aValue = a[sortField];
       let bValue = b[sortField];
@@ -113,8 +132,10 @@ function ItemTableWithEditor({
     });
   }, [items, sortField, sortDirection]);
 
+  const baseItems = showTopPerBuff ? topItemsFlat : sortedItems;
+
   const filteredItems = useMemo(() => {
-    return sortedItems.filter((item) => {
+    return baseItems.filter((item) => {
       const matchesText = Object.entries(item).some(([key, val]) => {
         if (key === 'buff_id') {
           const buffName = buffs.find((b) => b.buff_id === val)?.name ?? '';
@@ -129,7 +150,7 @@ function ItemTableWithEditor({
 
       return matchesText && matchesCategory;
     });
-  }, [sortedItems, filterText, selectedCategoryId, buffs]);
+  }, [baseItems, filterText, selectedCategoryId, buffs]);
 
   const handleSave = async (updatedItem) => {
     try {
@@ -289,6 +310,16 @@ function ItemTableWithEditor({
             }}
           />
         </div>
+
+        <label style={{ marginLeft: '12px', fontSize: '0.9rem' }}>
+          <input
+            type="checkbox"
+            checked={showTopPerBuff}
+            onChange={(e) => setShowTopPerBuff(e.target.checked)}
+            style={{ marginRight: '6px' }}
+          />
+          Show Top 3 Items Per Buff
+        </label>
       </div>
 
       {isLoading ? (
@@ -305,18 +336,24 @@ function ItemTableWithEditor({
                 {columns.map((col) => (
                   <th
                     key={col.field}
-                    onClick={() => handleSort(col.field)}
-                    tabIndex="0"
+                    onClick={disableSorting ? undefined : () => handleSort(col.field)}
+                    tabIndex={disableSorting ? -1 : 0}
                     aria-sort={
-                      sortField === col.field
-                        ? sortDirection === 'asc'
-                          ? 'ascending'
-                          : 'descending'
-                        : 'none'
+                      disableSorting
+                        ? 'none'
+                        : sortField === col.field
+                          ? sortDirection === 'asc'
+                            ? 'ascending'
+                            : 'descending'
+                          : 'none'
                     }
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') handleSort(col.field);
-                    }}
+                    onKeyDown={
+                      disableSorting
+                        ? undefined
+                        : (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') handleSort(col.field);
+                          }
+                    }
                     className="sortable"
                     style={{
                       ...(col.width ? { width: col.width } : {}),
@@ -326,7 +363,13 @@ function ItemTableWithEditor({
                     <div className="sortable-label-container">
                       <span className="sortable-label">{col.label}</span>
                       <span className="sort-arrow">
-                        {sortField === col.field ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                        {disableSorting
+                          ? ''
+                          : sortField === col.field
+                            ? sortDirection === 'asc'
+                              ? '▲'
+                              : '▼'
+                            : ''}
                       </span>
                     </div>
                   </th>
