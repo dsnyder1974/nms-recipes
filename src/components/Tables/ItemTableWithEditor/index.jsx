@@ -246,13 +246,24 @@ function ItemTableWithEditor({
       <h2 className="category-title">{title}</h2>
 
       <div className="datatable-header">
-        <input
-          type="text"
-          placeholder="Filter items..."
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-          className="filter-input"
-        />
+        <div className="filter-input-wrapper">
+          <input
+            type="text"
+            placeholder="Filter items..."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            className="filter-input"
+          />
+          {filterText && (
+            <button
+              className="clear-filter-button"
+              onClick={() => setFilterText('')}
+              aria-label="Clear filter"
+            >
+              ×
+            </button>
+          )}
+        </div>
 
         <div style={{ marginLeft: '12px', minWidth: '240px' }}>
           <Select
