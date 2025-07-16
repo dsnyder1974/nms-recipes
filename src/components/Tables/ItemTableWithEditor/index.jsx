@@ -93,6 +93,14 @@ function ItemTableWithEditor({
 
   const getBuffName = (id) => buffs.find((b) => b.buff_id === id)?.name ?? '- No buff -';
 
+  const getSortableValue = (item, field) => {
+    if (field === 'buff_id') {
+      return getBuffName(item.buff_id).toLowerCase();
+    }
+    const value = item[field];
+    return typeof value === 'string' ? value.toLowerCase() : value;
+  };
+
   const topItemsByBuff = useTopItemsByBuff(items, {
     topN: 3,
     sortField: 'units', // or another metric
@@ -104,9 +112,8 @@ function ItemTableWithEditor({
       .filter((item) => item); // avoid undefined
 
     return [...flatItems].sort((a, b) => {
-      let aValue = sortField === 'buff_id' ? getBuffName(a.buff_id).toLowerCase() : a[sortField];
-
-      let bValue = sortField === 'buff_id' ? getBuffName(b.buff_id).toLowerCase() : b[sortField];
+      let aValue = getSortableValue(a, sortField);
+      let bValue = getSortableValue(b, sortField);
 
       if (typeof aValue === 'string') {
         aValue = aValue?.toLowerCase() ?? '';
@@ -133,9 +140,8 @@ function ItemTableWithEditor({
     if (disableSorting) return items;
 
     return [...items].sort((a, b) => {
-      let aValue = sortField === 'buff_id' ? getBuffName(a.buff_id).toLowerCase() : a[sortField];
-
-      let bValue = sortField === 'buff_id' ? getBuffName(b.buff_id).toLowerCase() : b[sortField];
+      let aValue = getSortableValue(a, sortField);
+      let bValue = getSortableValue(b, sortField);
 
       if (typeof aValue === 'string') {
         aValue = aValue?.toLowerCase() ?? '';
