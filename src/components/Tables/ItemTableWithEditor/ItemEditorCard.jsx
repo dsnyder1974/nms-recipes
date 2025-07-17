@@ -6,6 +6,7 @@ import { getIngredientsForItem, setPreferredRecipeForItem } from '../../../api/i
 import { getItemRecipes, patchRecipe, postRecipe, deleteRecipe } from '../../../api/recipeApi';
 import RecipeRow from '../../Tables/RecipeRow';
 import RecipeEditDialog from '../RecipeEditDialog';
+import ImageGridSelector, { useImageOptions } from './ImageGridSelector';
 
 import './ItemEditorCard.css';
 
@@ -94,6 +95,10 @@ function ItemEditorCard({
       nameInputRef.current.focus();
     }
   }, [isEditing]);
+
+  const imageOptions = useImageOptions(
+    'https://h7p3wmkasd.execute-api.us-east-2.amazonaws.com/item-images'
+  );
 
   const confirmDiscardChanges = () => {
     if (isDirty) {
@@ -647,33 +652,25 @@ function ItemEditorCard({
         </div>
         {isEditing && showImagePopup && (
           <div className="image-url-popup">
-            <label className="field-label" htmlFor="image_url">
-              Image Url
-            </label>
-            <input
-              className="image-url-input"
-              type="text"
-              id="image_url"
-              value={editedItem.image_url || ''}
-              placeholder="Paste image URL"
-              onChange={(e) => handleChange('image_url', e.target.value)}
-              onBlur={() => setShowImagePopup(false)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  setShowImagePopup(false);
-                }
-                if (e.key === 'Escape') {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setEditedItem((prev) => ({ ...prev, image_url: item.image_url }));
-                  setShowImagePopup(false);
-                }
+            <label className="field-label">Select Image</label>
+            <ImageGridSelector
+              value={editedItem.image_url}
+              onChange={(val) => {
+                handleChange('image_url', val);
+                setShowImagePopup(false); // Close popup on selection
               }}
-              autoFocus
+              options={imageOptions}
             />
+            <button
+              onClick={() => setShowImagePopup(false)}
+              className="cancel-button"
+              style={{ marginTop: '10px' }}
+            >
+              Cancel
+            </button>
           </div>
         )}
+
         {isEditingRecipe && activeRecipe && (
           <RecipeEditDialog
             recipe={activeRecipe}
