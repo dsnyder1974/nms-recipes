@@ -650,6 +650,7 @@ function ItemEditorCard({
             </>
           )}
         </div>
+
         {isEditing && showImagePopup && (
           <div className="image-url-popup">
             <label className="field-label">Select Image</label>
