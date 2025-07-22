@@ -479,6 +479,7 @@ function ItemTableWithEditor({
               allCategories={allCategories}
               onAdd={handleAdd}
               onCancel={() => setIsAdding(false)}
+              existingNames={Object.values(itemNamesById)}
             />
           )}
         </>

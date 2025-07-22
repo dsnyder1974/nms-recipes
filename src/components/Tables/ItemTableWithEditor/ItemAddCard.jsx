@@ -4,7 +4,7 @@ import ImageGridSelector, { useImageOptions } from './ImageGridSelector';
 
 import './ItemEditorCard.css';
 
-function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
+function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel, existingNames = [] }) {
   const [newItem, setNewItem] = useState({ categories: [] });
   const [isSaving, setIsSaving] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -12,6 +12,7 @@ function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
   const modalRef = useRef(null);
   const imageRef = useRef(null);
   const nameInputRef = useRef(null);
+  const [nameError, setNameError] = useState('');
 
   const mainFields = columns.filter((c) => (c.group ?? 'main') === 'main' && c.field !== 'item_id');
   const buffFields = columns.filter((c) => c.group === 'buff');
@@ -56,6 +57,13 @@ function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
 
   const handleChange = (field, value) => {
     if (field === 'image_url') setImageError(false);
+
+    if (field === 'name') {
+      const trimmed = value.trim().toLowerCase();
+      const isDuplicate = existingNames.some((n) => n.toLowerCase() === trimmed);
+      setNameError(isDuplicate ? 'An item with this name already exists.' : '');
+    }
+
     setNewItem((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -127,6 +135,11 @@ function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
                   />
                 )}
                 {col.required && <span className="required-hint">Required</span>}
+                {col.field === 'name' && nameError && (
+                  <div className="validation-error" style={{ color: 'red', fontSize: '0.9em' }}>
+                    {nameError}
+                  </div>
+                )}
               </div>
             ))}
 
@@ -285,7 +298,7 @@ function ItemAddCard({ columns, buffs, allCategories, onAdd, onCancel }) {
         </div>
 
         <div className="editor-actions">
-          <button className="save-button" onClick={handleSubmit} disabled={isSaving}>
+          <button className="save-button" onClick={handleSubmit} disabled={isSaving || !!nameError}>
             {isSaving ? 'Saving...' : 'Add'}
           </button>
           <button className="cancel-button" onClick={onCancel} disabled={isSaving}>
